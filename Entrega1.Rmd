@@ -34,7 +34,6 @@ if(Sys.info()[['sysname']] == "Windows"){
   
 
 data<-read.csv("diabetes2.csv",header=T,sep=",")
-attach(data)
 data$Outcome<-as.factor(data$Outcome)
 ```
 
@@ -77,6 +76,12 @@ Se muestran el porcentaje de valores nulos de cada columna. Para Glucosa y Presi
 
 Para el caso de DiabetesPedigreeFunction también decidimos quitarlos.
 
+```{r}
+clean_data = adjust_data(data, "Glucose", equals, 0)
+clean_data = adjust_data(clean_data, "BloodPressure", equals, 0)
+clean_data = adjust_data(clean_data, "DiabetesPedigreeFunction", greater_than, 1)
+```
+
 ## **Punto 2**
 
 El modelo resulta
@@ -109,7 +114,7 @@ Cuál es el modelo propuesto? verificar los puntos de BMI con qqnorm
 ## Punto 3
 
 ```{r}
-ggpairs(data)
+ggpairs(clean_data)
 ```
 
 ## Punto 4
@@ -119,18 +124,14 @@ Al ver los outcomes podemos ver que existe una mayor correlación entre los valo
 ## Punto 5
 
 ```{r}
-vars = cbind(Glucose, Pregnancies, BloodPressure, SkinThickness, Insulin, DiabetesPedigreeFunction, Age)
-
-exhaustive<-regsubsets(data$BMI~vars,data = data, method = "exhaustive")
+exhaustive = stepwise(clean_data)
 summary(exhaustive)
+```
 
-par(mfrow=c(2,2))
-plot(summary(exhaustive)$rss,pch=20,xlab="Modelo", ylab= "RSS")
-plot(summary(exhaustive)$rsq,pch=20,xlab="Modelo", ylab= "R^2")
-plot(summary(exhaustive)$adjr2,pch=20,xlab="Modelo", ylab= "R^2 aj")
-plot(summary(exhaustive)$cp,pch=20,xlab="Modelo", ylab= "CP")
-abline(0,1)
-par(mfrow=c(1,1))
+```{r}
+clean_data_insuline = adjust_data(clean_data, "Insulin", equals, 0)
+exhaustive = stepwise(clean_data_insuline)
+summary(exhaustive)
 ```
 
 Multiple R-squared: 0.466 es el coeficiente de determinación.
