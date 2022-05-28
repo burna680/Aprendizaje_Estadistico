@@ -17,6 +17,7 @@ library(dplyr) #For filter usage
 library(gridExtra) #For subplots with ggplot
 library(hrbrthemes)
 library(latex2exp)
+library(leaps)
 source("functions.R")
 ```
 
@@ -33,6 +34,7 @@ if(Sys.info()[['sysname']] == "Windows"){
   
 
 data<-read.csv("diabetes2.csv",header=T,sep=",")
+attach(data)
 data$Outcome<-as.factor(data$Outcome)
 ```
 
@@ -117,9 +119,18 @@ Al ver los outcomes podemos ver que existe una mayor correlación entre los valo
 ## Punto 5
 
 ```{r}
-lin_reg<-lm(data$BMI~data$Glucose+data$Pregnancies+data$BloodPressure+data$SkinThickness+data$Insulin+data$DiabetesPedigreeFunction+data$Age)
-summary(lin_reg)
-summary(lin_reg)$sigma #Valor estimado para sigma cuadrado 
+vars = cbind(Glucose, Pregnancies, BloodPressure, SkinThickness, Insulin, DiabetesPedigreeFunction, Age)
+
+exhaustive<-regsubsets(data$BMI~vars,data = data, method = "exhaustive")
+summary(exhaustive)
+
+par(mfrow=c(2,2))
+plot(summary(exhaustive)$rss,pch=20,xlab="Modelo", ylab= "RSS")
+plot(summary(exhaustive)$rsq,pch=20,xlab="Modelo", ylab= "R^2")
+plot(summary(exhaustive)$adjr2,pch=20,xlab="Modelo", ylab= "R^2 aj")
+plot(summary(exhaustive)$cp,pch=20,xlab="Modelo", ylab= "CP")
+abline(0,1)
+par(mfrow=c(1,1))
 ```
 
 Multiple R-squared: 0.466 es el coeficiente de determinación.
@@ -169,7 +180,7 @@ si rechazo, discutir
 ## Punto 8
 
 ```{r}
-newdata = data.frame(Pregnancies = 2, Glucose = 100, BloodPressure = 70, SkinThickness = 20, Outcome = as.factor(1), DiabetesPedigreeFunction = 0.24, Age = 30, Insuline = 0, X = 2)
+newdata = data.frame(Pregnancies = 2, Glucose = 100, BloodPressure = 70, SkinThickness = 20, Outcome = as.factor(1), DiabetesPedigreeFunction = 0.24, Age = 30, Insuline = 0)
 prediction = predict(lin_reg, newdata = newdata)
 ```
 
