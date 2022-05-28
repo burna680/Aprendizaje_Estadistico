@@ -1,0 +1,180 @@
+---
+title: "Entrega1"
+output: html_document
+date: '2022-05-26'
+editor_options: 
+  chunk_output_type: inline
+---
+
+```{r setup, include=FALSE, results=FALSE}
+knitr::opts_chunk$set(echo = FALSE, results = FALSE, warning=FALSE, message=FALSE)
+```
+
+```{r pressure}
+library(ggplot2)
+library(GGally)
+library(dplyr) #For filter usage
+library(gridExtra) #For subplots with ggplot
+library(hrbrthemes)
+library(latex2exp)
+source("functions.R")
+```
+
+Todos los pacientes son de sexo femenino mayores de 21 años de herencia Pima. Para este primer estudio, lo que buscaremos es encontrar relaciones entre otras de las variables contenidas en el dataset.
+
+## Punto 1
+
+```{r}
+if(Sys.info()[['sysname']] == "Windows"){
+  setwd("g:\\LUCAS\\Facultad\\Aprendizaje Estadistico\\Entregas\\Primera\\")
+} else {
+  setwd("~/Desktop/Facultad/Aprendizaje_estadistico/TP1")
+}
+  
+
+data<-read.csv("diabetes2.csv",header=T,sep=",")
+data$Outcome<-as.factor(data$Outcome)
+```
+
+Se analizaron los datos y se llega a la conclusión de que todas las columnas se encuentran bien definidas.
+
+La columna X parecería ser un contador ya que es siempre ascendiente aunque faltan algunos numeros, podría ser un identificador de muestras. Por lo tanto no lo tomamos en cuenta para los análisis siguientes.
+
+```{r}
+data = within(data, rm(X))
+```
+
+Revisando los valores se nota que algunas filas tienen algunos valores en 0 que no tendrían mucho sentido en este contexto medicinal. Por ejemplo no se le encuentra mucho sentido que la presión sanguínea sea 0. Por lo tanto se comienza una exploración de datos para ver que porcentaje de los datos tienen valores en 0.\
+\
+Se considera que solo las columnas de Glucosa, Presión Sanguínea, Insulina y la Edad no pueden ser 0.
+
+```{r, results = TRUE}
+missing_data = count_missing_values(data, c('Glucose', 'BloodPressure', 'Insulin', 'Age'), 0, equals)
+missing_data * 100 / nrow(data)
+```
+
+Por otro lado se enti
+
+```{r, results = TRUE}
+missing_data = count_missing_values(data, c('DiabetesPedigreeFunction'), 1, greater_than)
+missing_data * 100 / nrow(data)
+```
+
+edad
+
+```{r, results = TRUE}
+missing_data = count_missing_values(data, c('Age'), 21, less_than)
+missing_data * 100 / nrow(data)
+```
+
+Se muestran el porcentaje de valores nulos de cada columna. Para Glucosa y Presión Sanguínea no representa una porción grande de los datos por lo que podríamos quitar esas líneas, pero para la Insulina en cambio si. En los siguientes probaremos formas de tratar estos datos:
+
+-   Eliminar esas filas como hicimos con las otras columnas.
+
+-   Asignarles valores en función de alguna métrica como por ejemplo la media.
+
+Para el caso de DiabetesPedigreeFunction también decidimos quitarlos.
+
+## **Punto 2**
+
+El modelo resulta
+
+$\Omega$: Y= X$\beta$+$\epsilon$
+
+Cuyos supuestos son:
+
+1.  Y $\sim$ $\mathcal{N}$(X$\beta$, $\sigma^2I$) , los valores de BMI
+
+    Y $\in$ $\mathcal{R} ^{nx1}, n=539$ la cantidad de observaciones
+
+2.  E($\epsilon$)=0 , $\epsilon\in$ $\mathcal{R} ^{nx1}$
+
+3.  Var($\epsilon$)= $\sigma^2$
+
+4.  $Y_{1}, \ldots, Y_{n}$ son independientes
+
+    Al definir los elementos\
+    $$
+    Y=\left(y_{1}, \ldots, y_{n}\right)^{T}, \epsilon=\left(\epsilon_{1}, \ldots, \epsilon_{n}\right)^{T}, \beta=\left(\beta_{1}, \ldots, \beta_{p}\right)^{T}
+    $$
+
+    $\beta\in$ $\mathcal{R} ^{px1}$
+
+    X $\in$ $\mathcal{R} ^{nxp}, p= 8$ Es la matriz de diseño. La cantidad de variables del modelo es p. Incluyen la cantidad de embarazos, el nivel de glucosa, etc. $$\mathbf{X}=\left[\begin{array}{cccc}1 & x_{11} & \ldots & x_{1(p-1)} \\1 & \cdot & \cdot & \cdot \\1 & \cdot & \cdot & \cdot \\1 & \cdot & \cdot & \cdot \\1 & x_{n 1} & \ldots & x_{n(p-1)}\end{array}\right]$$
+
+Cuál es el modelo propuesto? verificar los puntos de BMI con qqnorm
+
+## Punto 3
+
+```{r}
+ggpairs(data)
+```
+
+## Punto 4
+
+Al ver los outcomes podemos ver que existe una mayor correlación entre los valores de la SkinThickness y los de BMI, por lo que si tuvieramos que perder información eligiendo sólo una variable de las contenidas en el dataset sería la SkinThickness
+
+## Punto 5
+
+```{r}
+lin_reg<-lm(data$BMI~data$Glucose+data$Pregnancies+data$BloodPressure+data$SkinThickness+data$Insulin+data$DiabetesPedigreeFunction+data$Age)
+summary(lin_reg)
+summary(lin_reg)$sigma #Valor estimado para sigma cuadrado 
+```
+
+Multiple R-squared: 0.466 es el coeficiente de determinación.
+
+$\textit{¿Qué variables resultan significativas?}$
+
+Se realiza un test de hipótesis por cada variable a estimar, que representan los $\beta_i$. Para ver las variables de interés tenemos que mirar el p-valor de vada una de ellas. Vemos que todas excepto la glucosa y la cantidad de embarazos son los que tienen el p-valor mayor.
+
+\$\\textit{
+
+¿Cuál es el valor de la estimación para $\sigma ^2$?}\$
+
+Se mira con "summary(lin_reg)\$sigma".
+
+$\textit{ Especificar las hipótesis nulas y alternativas para alguno de los test t reportados en la tabla, el estadístico deltest y la regla de decisión}$
+
+Las hiótesis nulas están dadas por CREO QUE ACA NO VA ESTO VA EN EL 7
+
+$$H_{0}: \beta_{1}=\cdots=\beta_{p-1}=0 \quad \text { Vs. } \quad H_{1}: \text { Algun } \quad \beta_{i} \neq 0, \quad i=1, \ldots, p-1$$
+
+Con lo cual estamos verificando que nuestro modelo lineal sea relevante por sobre la estimación de la esperanza, es decir si el modelo conviene por sobre el promedio.\
+\
+En particular, al analizar la glucosa \$\\textit{
+
+¿Cómo se calcula el p-valor para este test?}\$
+
+## Punto 6
+
+$$
+R^{2}=\frac{\|\hat{Y}-\bar{Y}\|^{2}}{\|Y-\bar{Y}\|^{2}}=\frac{S C R}{S C T}= 0.4669
+$$
+
+Donde $\hat Y$ es la estimación de $Y$ e $\bar Y$ es la media. El $R^2$ da una medida de la capacidad de ajuste del modelo, es decir que da una noción de cuanta variabilidad de $Y$ queda explicada por el modelo. Cuando el valor se encuentra más cercano a 1 quiere decir que el modelo explica mejor la variabilidad.
+
+A medida que se agregan variables al modelo este valor siempre crece, a pesar de que estas nuevas variable no aporten a la estimación. Por eso es que cuando se quiere comparar dos modelos es preferible usar el coeficiente de determinación ajustado como:
+
+$$
+R_{a}^{2}=1-\frac{n-1}{n-p} \frac{\|Y-\hat{Y}\|^{2}}{\|Y-\bar{Y}\|^{2}}=1-\left(1-R^{2}\right) \frac{n}{n-p}
+$$
+
+## Punto 7
+
+$$H_{0}: \beta_{1}=\cdots=\beta_{p-1}=0 \quad \text { Vs. } \quad H_{1}: \text { Algun } \quad \beta_{i} \neq 0, \quad i=1, \ldots, p-1$$
+
+si rechazo, discutir
+
+## Punto 8
+
+```{r}
+newdata = data.frame(Pregnancies = 2, Glucose = 100, BloodPressure = 70, SkinThickness = 20, Outcome = as.factor(1), DiabetesPedigreeFunction = 0.24, Age = 30, Insuline = 0, X = 2)
+prediction = predict(lin_reg, newdata = newdata)
+```
+
+## Punto 9
+
+## Punto 10
+
+## Punto 11
