@@ -131,6 +131,7 @@ plot(summary(exhaustive)$adjr2,pch=20,xlab="Modelo", ylab= "R^2 aj")
 plot(summary(exhaustive)$cp,pch=20,xlab="Modelo", ylab= "CP")
 abline(0,1)
 par(mfrow=c(1,1))
+lin_reg<-lm(data$BMI~vars,data = data)
 ```
 
 Multiple R-squared: 0.466 es el coeficiente de determinación.
@@ -180,12 +181,57 @@ si rechazo, discutir
 ## Punto 8
 
 ```{r}
-newdata = data.frame(Pregnancies = 2, Glucose = 100, BloodPressure = 70, SkinThickness = 20, Outcome = as.factor(1), DiabetesPedigreeFunction = 0.24, Age = 30, Insuline = 0)
-prediction = predict(lin_reg, newdata = newdata)
+newdata = data.frame(varsPregnancies = 2, varsGlucose = 100, varsBloodPressure = 70, varsSkinThickness = 20, varsDiabetesPedigreeFunction = 0.24, varsAge = 30, varsInsuline = 0)
+dat=c(100,2,70,20,0,0.24,30 )
+prediction <- predict(lin_reg, newdata = newdata)
+#prediction<-mean(prediction)
+
+prediction_=lin_reg$coefficients[1]+lin_reg$coefficients[2]*dat[1]+lin_reg$coefficients[3]*dat[2]+lin_reg$coefficients[4]*dat[3]+lin_reg$coefficients[5]*dat[4]+lin_reg$coefficients[6]*dat[5]+lin_reg$coefficients[7]*dat[6]+lin_reg$coefficients[8]*dat[7]
+
+modelo <- lm(BMI ~ Pregnancies + Glucose + BloodPressure + SkinThickness 
+          + DiabetesPedigreeFunction + Age) 
+
+newdata <- data[1, ];
+newdata$Pregnancies = 2;
+newdata$Glucose = 100;
+newdata$BloodPressure = 70;
+newdata$SkinThickness = 20;
+newdata$DiabetesPedigreeFunction = 0.24;
+newdata$Age = 30;
+newdata$Insulin = 0;
+newdata = newdata[-c(6,9)]; #Eliminacion de columnas de BMI y Outcome
+
+pred = predict(modelo, newdata);
 ```
 
 ## Punto 9
 
+```{r}
+IC <-predict(modelo, newdata = newdata, interval = "confidence") #Intervalo de confianza por default es .95
+```
+
 ## Punto 10
 
 ## Punto 11
+
+```{r}
+#Residuos unicamente
+ggplot(data=data, aes(x=1:length(modelo$residuals), y=modelo$residuals)) + 
+  geom_point(col="gray0", fill="darkorchid3", alpha = .9) + 
+  labs(title="Residuos", x="Indice", y="Valores") + xlim(c(0,length(modelo$residuals))) + ylim(c(min(modelo$residuals),max(modelo$residuals)))
+
+#Residuos vs outcomes predichos
+
+# ggplot(data=data, aes(x=modelo$residuals, y=modelo$fitted.values)) + 
+#   geom_point(col="gray0", fill="darkorchid3", alpha = .9) + 
+#   labs(title="Residuos", x="BMI", y="Valores") + xlim(c(0,length(modelo$fitted.values))) + ylim(c(min(modelo$fitted.values),max(modelo$fitted.values)))
+
+ggplot(data=data, aes(x=modelo$residuals, y=modelo$fitted.values)) +    geom_point(col="gray0", fill="darkorchid3", alpha = .9) + 
+   labs(title="Residuos", x="BMI", y="Valores") + xlim(c(0,length(modelo$fitted.values))) + ylim(c(min(modelo$fitted.values),max(modelo$fitted.values)))
+
+qqnorm(modelo$residuals, col = "mediumpurple3", pch = 20, xlab = "Cuantiles teóricos", ylab = "Cuantiles estimados", main = "Comparación")
+qqline(modelo$residuals, col="black")
+
+mean(modelo$residuals)
+sd(modelo$residuals)
+```
