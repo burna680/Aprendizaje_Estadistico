@@ -95,7 +95,7 @@ Al ver la tabla podemos ver que existe una mayor correlación entre los valores 
 ## Punto 5
 
 ```{r, results = TRUE}
-vars = cbind(Glucose = data$Glucose, Pregnancies = data$Pregnancies, BloodPressure = data$BloodPressure, SkinThickness = data$SkinThickness, Insulin = data$Insulin, DiabetesPedigreeFunction = data$DiabetesPedigreeFunction, Age = data$Age)
+vars = cbind(Glucose = data$Glucose, Pregnancies = data$Pregnancies, BloodPressure = data$BloodPressure, SkinThickness = data$SkinThickness, Insulin = data$Insulin, DiabetesPedigreeFunction = data$DiabetesPedigreeFunction, Age = data$Age, Outcome = data$Outcome)
 
 lin_reg = lm(data$BMI~vars, data = data)
 summary(lin_reg)
@@ -330,3 +330,44 @@ clean_data = adjust_data(clean_data, "DiabetesPedigreeFunction", greater_than, 1
 ```
 
 ## 
+
+## Punto 12
+
+Como se había elegido la columna SkinThickness, se realiza el bootstrap no paramétrico y como remuestra se toma la salida de la regresión simple. Se toman 10000 muestras del estimador y se gráfica la densidad usando nucleo gaussiano, se compara contra una normal y se calculan la media y el desvío estandard.
+
+```{r}
+Nboot = 10000
+n = length(data$BMI)
+data_bootstrap = cbind(BMI = data$BMI, SkinThickness = data$SkinThickness)
+estimations = c()
+for(i in 1:Nboot) 
+{
+  samples = data_bootstrap[sample(nrow(data_bootstrap),size=n,replace=TRUE),]
+  lin_reg_boot = lm(samples[,1]~samples[,2])
+  estimations[i] = unname(lin_reg_boot$coefficients[2])
+}
+```
+
+```{r, echo=TRUE, results=TRUE}
+mean(estimations)
+var(estimations)
+```
+
+```{r, echo=TRUE, results=TRUE}
+plot(density(estimations,
+             bw = "nrd0", 
+             adjust = 1,
+             kernel = kernels[1], window=1), col="mediumpurple3",lwd = 3)
+legend("topright", legend="Gaussian kernel",
+       col="mediumpurple3", lty=1:2, cex=0.8)
+grid()
+```
+
+```{r, echo=TRUE, results=TRUE}
+qqnorm(estimations, col = "mediumpurple3", pch = 20, xlab = "Cuantiles teóricos", ylab = "Cuantiles estimados", main = "Comparación para las medias")
+qqline(estimations, col="black")
+
+grid(nx = NULL, ny = NULL, lty = 2, col = "gray", lwd = 1)
+```
+
+Se puede notar que es similar a una gaussiana, esto es útil ya que indica que el valor no varía mucho.
