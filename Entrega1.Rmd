@@ -4,10 +4,12 @@ output: html_document
 date: '2022-05-26'
 editor_options: 
   chunk_output_type: inline
+  fig_width: 6 
+  fig_height: 4 
 ---
 
 ```{r setup, include=FALSE, results=FALSE}
-knitr::opts_chunk$set(echo = FALSE, results = FALSE, warning=FALSE, message=FALSE)
+knitr::opts_chunk$set(echo = FALSE, results = FALSE, warning=FALSE, message=FALSE, fig.align = "center", fig.width=12, fig.height=8)
 ```
 
 ```{r pressure}
@@ -45,8 +47,200 @@ La columna X parecería ser un contador ya que es siempre ascendiente aunque fal
 data = within(data, rm(X))
 ```
 
-Revisando los valores se nota que algunas filas tienen algunos valores en 0 que no tendrían mucho sentido en este contexto medicinal. Por ejemplo no se le encuentra mucho sentido que la presión sanguínea sea 0. Por lo tanto se comienza una exploración de datos para ver que porcentaje de los datos tienen valores en 0.\
+Revisando los valores se nota que algunas filas tienen algunos valores en 0 que no tendrían mucho sentido en este contexto medicinal. Por ejemplo no se le encuentra mucho sentido que la presión sanguínea sea 0. Por lo tanto se comienza una exploración de datos para ver que porcentaje de los datos tienen valores en 0. Igualmente este análisis se deja para el punto 10 de selección de modelos.\
 \
+
+## **Punto 2**
+
+El modelo resulta
+
+$\Omega$: Y= X$\beta$+$\epsilon$
+
+Cuyos supuestos son:
+
+1.  Y $\sim$ $\mathcal{N}$(X$\beta$, $\sigma^2I$) , los valores de BMI
+
+    Y $\in$ $\mathcal{R} ^{nx1}, n=539$ la cantidad de observaciones
+
+2.  E($\epsilon$)=0 , $\epsilon\in$ $\mathcal{R} ^{nx1}$
+
+3.  Var($\epsilon$)= $\sigma^2$
+
+4.  $Y_{1}, \ldots, Y_{n}$ son independientes
+
+    Al definir los elementos\
+    $$
+    Y=\left(y_{1}, \ldots, y_{n}\right)^{T}, \epsilon=\left(\epsilon_{1}, \ldots, \epsilon_{n}\right)^{T}, \beta=\left(\beta_{1}, \ldots, \beta_{p}\right)^{T}
+    $$
+
+    $\beta\in$ $\mathcal{R} ^{px1}$
+
+    X $\in$ $\mathcal{R} ^{nxp}, p= 8$ Es la matriz de diseño. La cantidad de variables del modelo es p. Incluyen la cantidad de embarazos, el nivel de glucosa, etc. $$\mathbf{X}=\left[\begin{array}{cccc}1 & x_{11} & \ldots & x_{1(p-1)} \\1 & \cdot & \cdot & \cdot \\1 & \cdot & \cdot & \cdot \\1 & \cdot & \cdot & \cdot \\1 & x_{n 1} & \ldots & x_{n(p-1)}\end{array}\right]$$
+
+Cuál es el modelo propuesto? verificar los puntos de BMI con qqnorm
+
+## Punto 3
+
+La siguiente tabla muestra las correlaciones entre los distintos pares de variables del dataset. Se puede ver que en la última columna no se muestran los resultados como en las otras ya que la variable Outcome es una variable categórica.
+
+```{r}
+ggpairs(data)
+```
+
+## Punto 4
+
+Al ver la tabla podemos ver que existe una mayor correlación entre los valores de la SkinThickness y los de BMI, por lo que si tuviéramos que perder información eligiendo sólo una variable de las contenidas en el dataset sería la SkinThickness ya que sería un modelo de regresión lineal simple y la correlación da una noción de como explica una variable a la otra.
+
+## Punto 5
+
+```{r, results = TRUE}
+# detach(data)
+attach(data)
+vars = cbind(Glucose, Pregnancies, BloodPressure, SkinThickness, Insulin, DiabetesPedigreeFunction, Age)
+
+lin_reg = lm(data$BMI~vars, data = data)
+summary(lin_reg)
+```
+
+En la anterior tabla se puede ver el resultado de la regresión lineal múltiple.
+
+En la parte de coeficientes cada fila expresa medidas de cada coeficiente de los parámetros estimados ($\beta_i$). La primer columna es el valor de la estimación, y después las otras tres columnas son tests de hipótesis para cada estimación de la siguiente forma:
+
+$$
+H_{0}: \beta_{i}=0 \quad V s . \quad H_{1}: \beta_{i} \neq 0
+$$
+
+La regla de decisión será
+
+$$
+\varphi(\underline{X})= \begin{cases}1 & \text { si } \quad|T|>k_{\alpha} \\ 0 & \text { en otro caso }\end{cases}
+$$
+
+Donde
+
+$$
+T=\frac{\hat{\beta_i}}{S \sqrt{d_{i i}}}, T ∼ t_{n - p}
+$$
+
+Donde S es la estimación (insesgada) del desvío estándar del estimador.
+
+Y $d_{ii}$ es el elemento de la matriz $D=\left(\mathbf{X}^{T} \mathbf{X}\right)^{-1}$
+
+$k_{\alpha}$ es una constante que depende de $\alpha$ que es el nivel de significación del test.
+
+Por último el p-valor se calcula de la siguiente manera:
+
+$$
+p-\text { valor }=2 \mathbf{P}\left(T \geq\left|T_{o b s}\right|\right)
+$$
+
+Entonces la columna de Std. Error es la multiplicación de $s$ y $\sqrt{d_{ii}}$, t value es el valor obtenido del estadístico T, osea: $\frac{\hat{\beta_i}}{s \sqrt{d_{i i}}}$
+
+Y la última columna es el p valor obtenido para ese $t$, osea: $2 \mathbf{P}\left(T \geq\left|t\right|\right)$
+
+Como ejemplo se toma la variable SkinThickness y se calcula a "mano" los valores:
+
+$$S^{2}=\frac{\|Y-\hat{Y}\|^{2}}{n-p}$$
+
+```{r, results=TRUE, echo=TRUE}
+Y_hat = predict(lin_reg)
+s = sqrt(norm(as.matrix(data$BMI - Y_hat), type = "2")**2 / (539 - 8))
+s
+```
+
+Que es el mismo que aparece en la tabla como Residual Standar Error.
+
+```{r, results=TRUE, echo=TRUE}
+X = cbind(rep(c(1), 539), vars) # vars contiene las columnas en el orden igual al que se hizo la regresion lineal
+D = solve(t(X) %*% X)
+d44 = D[5, 5] # ya que el 0,0 sería el del intercept
+std_err_b4 = (sqrt(d44) * s)
+std_err_b4
+```
+
+Que es el mismo valor que se obtiene en la tabla como Std. Error.
+
+```{r, results=TRUE, echo=TRUE}
+t_b4 = unname(lin_reg$coefficients['varsSkinThickness']/std_err_b4)
+t_b4
+```
+
+Que es el valor que se obtiene de la tabla como t value
+
+Por último se puede calcular el p valor usando la función de distribución de la t de Student
+
+```{r, results=TRUE, echo=TRUE}
+2*(1 - pt(t_b4, 539 - 8))
+```
+
+Ahora mirando todos los resultados se puede decidir que valores son significativos de la estimación y se decide que las variables con un valor significativo ($p-valor < 0.05$) del test son:
+
+-   Intercept ($\beta_0$)
+
+-   BloodPressure
+
+-   SkinThickness
+
+-   Insulin
+
+-   DiabetesPedigreeFunction
+
+## Punto 6
+
+$$
+R^{2}=\frac{\|\hat{Y}-\bar{Y}\|^{2}}{\|Y-\bar{Y}\|^{2}}=\frac{S C R}{S C T}= 0.4669
+$$
+
+Donde $\hat Y$ es la estimación de $Y$ e $\bar Y$ es la media. El $R^2$ da una medida de la capacidad de ajuste del modelo, es decir que da una noción de cuanta variabilidad de $Y$ queda explicada por el modelo. Cuando el valor se encuentra más cercano a 1 quiere decir que el modelo explica mejor la variabilidad.
+
+A medida que se agregan variables al modelo este valor siempre crece, a pesar de que estas nuevas variable no aporten a la estimación. Por eso es que cuando se quiere comparar dos modelos es preferible usar el coeficiente de determinación ajustado como:
+
+$$
+R_{a}^{2}=1-\frac{n-1}{n-p} \frac{\|Y-\hat{Y}\|^{2}}{\|Y-\bar{Y}\|^{2}}=1-\left(1-R^{2}\right) \frac{n}{n-p}
+$$
+
+## Punto 7
+
+Si se quiere analizar si la regresión es significativa se puede hacer el siguiente test
+
+$$H_{0}: \beta_{1}=\cdots=\beta_{p-1}=0 \quad \text { Vs. } \quad H_{1}: \text { Algun } \quad \beta_{i} \neq 0, \quad i=1, \ldots, p-1$$
+
+$$
+\varphi(\underline{X})= \begin{cases}1 & \text { si } \quad F>\mathcal{F}_{p-1, n-p, 1-\alpha} \\ 0 & \text { en otro caso }\end{cases}
+$$
+
+Donde:
+
+$$
+F=\frac{(C \hat{\beta})^{T}\left(C\left(\mathbf{X}^{T} \mathbf{X}\right)^{-1} C^{T}\right)^{-1}(C \hat{\beta})}{(p - 1) S^{2}} 
+$$
+
+Con:
+
+$$
+\mathbf{C}=\left[\begin{array}{ccc}0 & 1 \ldots & 0 \\0 & . & . \\. & . & \cdot \\. & \cdot & \cdot \\0 & \ldots & 1\end{array}\right] ; C\in \mathcal{R}^{(p-1)\times p}
+$$
+
+Que representa la manera que está armado el test ($\beta_{1}=0 ; \beta_{2}=0 ...$)
+
+En este caso el p-valor se calcula como:
+
+$$
+p-\text { valor }=\mathbf{P}\left(F \geq F_{o b s}\right), \quad F \sim \mathcal{F}_{p - 1, n-p}
+$$
+
+Por lo tanto en este caso el p-valor está tan cercano a 0 que significa que la regresión es significativa.
+
+## Punto 8
+
+```{r}
+
+```
+
+## Punto 9
+
+## Punto 10
+
 Se considera que solo las columnas de Glucosa, Presión Sanguínea, Insulina y la Edad no pueden ser 0.
 
 ```{r, results = TRUE}
@@ -82,46 +276,7 @@ clean_data = adjust_data(clean_data, "BloodPressure", equals, 0)
 clean_data = adjust_data(clean_data, "DiabetesPedigreeFunction", greater_than, 1)
 ```
 
-## **Punto 2**
-
-El modelo resulta
-
-$\Omega$: Y= X$\beta$+$\epsilon$
-
-Cuyos supuestos son:
-
-1.  Y $\sim$ $\mathcal{N}$(X$\beta$, $\sigma^2I$) , los valores de BMI
-
-    Y $\in$ $\mathcal{R} ^{nx1}, n=539$ la cantidad de observaciones
-
-2.  E($\epsilon$)=0 , $\epsilon\in$ $\mathcal{R} ^{nx1}$
-
-3.  Var($\epsilon$)= $\sigma^2$
-
-4.  $Y_{1}, \ldots, Y_{n}$ son independientes
-
-    Al definir los elementos\
-    $$
-    Y=\left(y_{1}, \ldots, y_{n}\right)^{T}, \epsilon=\left(\epsilon_{1}, \ldots, \epsilon_{n}\right)^{T}, \beta=\left(\beta_{1}, \ldots, \beta_{p}\right)^{T}
-    $$
-
-    $\beta\in$ $\mathcal{R} ^{px1}$
-
-    X $\in$ $\mathcal{R} ^{nxp}, p= 8$ Es la matriz de diseño. La cantidad de variables del modelo es p. Incluyen la cantidad de embarazos, el nivel de glucosa, etc. $$\mathbf{X}=\left[\begin{array}{cccc}1 & x_{11} & \ldots & x_{1(p-1)} \\1 & \cdot & \cdot & \cdot \\1 & \cdot & \cdot & \cdot \\1 & \cdot & \cdot & \cdot \\1 & x_{n 1} & \ldots & x_{n(p-1)}\end{array}\right]$$
-
-Cuál es el modelo propuesto? verificar los puntos de BMI con qqnorm
-
-## Punto 3
-
-```{r}
-ggpairs(clean_data)
-```
-
-## Punto 4
-
-Al ver los outcomes podemos ver que existe una mayor correlación entre los valores de la SkinThickness y los de BMI, por lo que si tuvieramos que perder información eligiendo sólo una variable de las contenidas en el dataset sería la SkinThickness
-
-## Punto 5
+## 
 
 ```{r}
 exhaustive = stepwise(clean_data)
@@ -133,60 +288,5 @@ clean_data_insuline = adjust_data(clean_data, "Insulin", equals, 0)
 exhaustive = stepwise(clean_data_insuline)
 summary(exhaustive)
 ```
-
-Multiple R-squared: 0.466 es el coeficiente de determinación.
-
-$\textit{¿Qué variables resultan significativas?}$
-
-Se realiza un test de hipótesis por cada variable a estimar, que representan los $\beta_i$. Para ver las variables de interés tenemos que mirar el p-valor de vada una de ellas. Vemos que todas excepto la glucosa y la cantidad de embarazos son los que tienen el p-valor mayor.
-
-\$\\textit{
-
-¿Cuál es el valor de la estimación para $\sigma ^2$?}\$
-
-Se mira con "summary(lin_reg)\$sigma".
-
-$\textit{ Especificar las hipótesis nulas y alternativas para alguno de los test t reportados en la tabla, el estadístico deltest y la regla de decisión}$
-
-Las hiótesis nulas están dadas por CREO QUE ACA NO VA ESTO VA EN EL 7
-
-$$H_{0}: \beta_{1}=\cdots=\beta_{p-1}=0 \quad \text { Vs. } \quad H_{1}: \text { Algun } \quad \beta_{i} \neq 0, \quad i=1, \ldots, p-1$$
-
-Con lo cual estamos verificando que nuestro modelo lineal sea relevante por sobre la estimación de la esperanza, es decir si el modelo conviene por sobre el promedio.\
-\
-En particular, al analizar la glucosa \$\\textit{
-
-¿Cómo se calcula el p-valor para este test?}\$
-
-## Punto 6
-
-$$
-R^{2}=\frac{\|\hat{Y}-\bar{Y}\|^{2}}{\|Y-\bar{Y}\|^{2}}=\frac{S C R}{S C T}= 0.4669
-$$
-
-Donde $\hat Y$ es la estimación de $Y$ e $\bar Y$ es la media. El $R^2$ da una medida de la capacidad de ajuste del modelo, es decir que da una noción de cuanta variabilidad de $Y$ queda explicada por el modelo. Cuando el valor se encuentra más cercano a 1 quiere decir que el modelo explica mejor la variabilidad.
-
-A medida que se agregan variables al modelo este valor siempre crece, a pesar de que estas nuevas variable no aporten a la estimación. Por eso es que cuando se quiere comparar dos modelos es preferible usar el coeficiente de determinación ajustado como:
-
-$$
-R_{a}^{2}=1-\frac{n-1}{n-p} \frac{\|Y-\hat{Y}\|^{2}}{\|Y-\bar{Y}\|^{2}}=1-\left(1-R^{2}\right) \frac{n}{n-p}
-$$
-
-## Punto 7
-
-$$H_{0}: \beta_{1}=\cdots=\beta_{p-1}=0 \quad \text { Vs. } \quad H_{1}: \text { Algun } \quad \beta_{i} \neq 0, \quad i=1, \ldots, p-1$$
-
-si rechazo, discutir
-
-## Punto 8
-
-```{r}
-newdata = data.frame(Pregnancies = 2, Glucose = 100, BloodPressure = 70, SkinThickness = 20, Outcome = as.factor(1), DiabetesPedigreeFunction = 0.24, Age = 30, Insuline = 0)
-prediction = predict(lin_reg, newdata = newdata)
-```
-
-## Punto 9
-
-## Punto 10
 
 ## Punto 11
