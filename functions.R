@@ -24,16 +24,22 @@ adjust_data = function(data,name,comparisson,criteria){
   return(data[-missing_values,])
 }
 
-stepwise = function(datainfunction){
-  attach(datainfunction)
-  vars = cbind(Glucose, Pregnancies, BloodPressure, SkinThickness, Insulin, DiabetesPedigreeFunction, Age)
-  exhaustive<-regsubsets(datainfunction$BMI~vars,data = datainfunction, method = "exhaustive")
+stepwise = function(data){
+  vars = cbind(Glucose = data$Glucose, 
+               Pregnancies = data$Pregnancies, 
+               BloodPressure = data$BloodPressure, 
+               SkinThickness = data$SkinThickness, 
+               Insulin = data$Insulin, 
+               DiabetesPedigreeFunction = data$DiabetesPedigreeFunction, 
+               Age = data$Age)
   
-  par(mfrow=c(2,2))
-  plot(summary(exhaustive)$rss,pch=20,xlab="Modelo", ylab= "RSS")
-  plot(summary(exhaustive)$rsq,pch=20,xlab="Modelo", ylab= "R^2")
-  plot(summary(exhaustive)$adjr2,pch=20,xlab="Modelo", ylab= "R^2 aj")
-  plot(summary(exhaustive)$cp,pch=20,xlab="Modelo", ylab= "CP")
+  exhaustive<-regsubsets(data$BMI~vars,
+                         data = data, 
+                         method = "exhaustive")
+  
+  par(mfrow=c(2,1))
+  plot(summary(exhaustive)$adjr2, pch=20, xlab="Modelo", ylab= "R^2 aj")
+  plot(summary(exhaustive)$cp,ylim = c(0, 45), pch=20, xlab="Modelo", ylab= "CP")
   abline(0,1)
   par(mfrow=c(1,1))
   

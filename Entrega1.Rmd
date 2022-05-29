@@ -21,6 +21,7 @@ library(hrbrthemes)
 library(latex2exp)
 library(leaps)
 source("functions.R")
+library(bestglm)
 ```
 
 Todos los pacientes son de sexo femenino mayores de 21 años de herencia Pima. Para este primer estudio, lo que buscaremos es encontrar relaciones entre otras de las variables contenidas en el dataset.
@@ -94,9 +95,7 @@ Al ver la tabla podemos ver que existe una mayor correlación entre los valores 
 ## Punto 5
 
 ```{r, results = TRUE}
-# detach(data)
-attach(data)
-vars = cbind(Glucose, Pregnancies, BloodPressure, SkinThickness, Insulin, DiabetesPedigreeFunction, Age)
+vars = cbind(Glucose = data$Glucose, Pregnancies = data$Pregnancies, BloodPressure = data$BloodPressure, SkinThickness = data$SkinThickness, Insulin = data$Insulin, DiabetesPedigreeFunction = data$DiabetesPedigreeFunction, Age = data$Age)
 
 lin_reg = lm(data$BMI~vars, data = data)
 summary(lin_reg)
@@ -241,6 +240,60 @@ Por lo tanto en este caso el p-valor está tan cercano a 0 que significa que la 
 
 ## Punto 10
 
+Para la selección de modelos se consideran todas las posibles combinaciones de variables para poder encontrar el mejor de los modelos. Para considerar cual es el mejor es necesario definir métricas.
+
+Se utilizaran 3 métricas:
+
+-   $$
+    R_{a}^{2}=1-\frac{n-1}{n-p} \frac{\|Y-\hat{Y}\|^{2}}{\|Y-\bar{Y}\|^{2}}
+    $$
+
+-   $$
+    C p=\frac{\left\|Y-\hat{Y}_{p}\right\|^{2}}{S^{2}}+2 p-n, \quad \quad S^{2}=\frac{\left\|Y-\hat{Y}_{k}\right\|^{2}}{n-k}
+    $$
+
+-   $$
+    \widehat{E C M}=\frac{1}{n} \sum_{i=1}^{n} r_{-i}^{2}=\frac{1}{n} \sum_{i=1}^{n} \frac{r^{2}}{\left(1-p_{i i}\right)^{2}}
+    $$
+
+La bondad de ajuste está dada por el $R_{a}^{2}$, mientras que la bondad de predicción está dada por el $C_p$ . Otra métrica también utilizada es el error cuadrático medio para verificar cuanto se aleja la estimación de la medición, para este caso se usó el método de CV para medir esta métrica.
+
+```{r, results=TRUE}
+exhaustive = stepwise(data)
+Xy<-data.frame(X[,-1],data$BMI)
+bestlm <-bestglm(Xy = Xy,
+                      IC = "CV",
+                      method = "exhaustive")
+```
+
+Utilizando la función regsubsets con el metodo exhaustivo se obtuvieron los mejores (se queda con el modelo con mayor F) modelos para la cantidad de variables. En el gráfico de arriba se pueden ver como cambia el $R_{a}^{2}$ y el $C_p$ a medida que cambian la cantidad de variables. De aquí se podría considerar que el óptimo se obtiene con 5 variables, pero no hay mucha diferencia con los menores. Teniendo en cuenta de que se prefiere usar menor cantidad de variables se podría tomar el de 4 o 3.
+
+```{r, results=TRUE}
+summary(exhaustive)
+```
+
+En esta tabla se puede ver cuales variables se utilizan para la cantidad de variables.
+
+Para calcular el error cuadratico medio en cambio se usa la función bestglm ya que elije el mejor modelo (en este caso se le puede pedir que el mejor sea el que tenga menor ECM) usando cross validation.
+
+```{r, results=TRUE}
+bestlm$Subsets
+```
+
+Este algoritmo encuentra que el mejor modelo (el que minimiza el ECM) es el de 3 variables.
+
+Comparando los dos resultados elegimos el de 4 variables (en este caso dieron iguales) ya que para el segundo análisis no se encuentra muy alejado del mínimo, y para el primer análisis se encuentra cerca del óptimo.
+
+El modelo entonces resulta con los siguientes estimadores:
+
+```{r}
+coef(exhaustive, 4)
+```
+
+## Punto 11
+
+## Para el final
+
 Se considera que solo las columnas de Glucosa, Presión Sanguínea, Insulina y la Edad no pueden ser 0.
 
 ```{r, results = TRUE}
@@ -277,16 +330,3 @@ clean_data = adjust_data(clean_data, "DiabetesPedigreeFunction", greater_than, 1
 ```
 
 ## 
-
-```{r}
-exhaustive = stepwise(clean_data)
-summary(exhaustive)
-```
-
-```{r}
-clean_data_insuline = adjust_data(clean_data, "Insulin", equals, 0)
-exhaustive = stepwise(clean_data_insuline)
-summary(exhaustive)
-```
-
-## Punto 11
