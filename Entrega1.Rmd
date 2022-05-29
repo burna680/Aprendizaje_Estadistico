@@ -18,6 +18,7 @@ library(gridExtra) #For subplots with ggplot
 library(hrbrthemes)
 library(latex2exp)
 library(leaps)
+library(qqplotr)
 source("functions.R")
 ```
 
@@ -180,14 +181,16 @@ si rechazo, discutir
 
 ## Punto 8
 
+En el caso de querer obtener una estimación de la esperanza para el BMI, para una mujer que tuvo 2 embarazos, concentración de glucosa de 100, presión sanguínea de 70, piel de triceps de 20, sin diabetes, un valor de la función pedigree de 0.24 y 30 años usamos el modelo creado en el punto 5, cuyo valor resulta:
+
 ```{r}
-newdata = data.frame(varsPregnancies = 2, varsGlucose = 100, varsBloodPressure = 70, varsSkinThickness = 20, varsDiabetesPedigreeFunction = 0.24, varsAge = 30, varsInsuline = 0)
+#Predicción manual
 dat=c(100,2,70,20,0,0.24,30 )
-prediction <- predict(lin_reg, newdata = newdata)
-#prediction<-mean(prediction)
 
 prediction_=lin_reg$coefficients[1]+lin_reg$coefficients[2]*dat[1]+lin_reg$coefficients[3]*dat[2]+lin_reg$coefficients[4]*dat[3]+lin_reg$coefficients[5]*dat[4]+lin_reg$coefficients[6]*dat[5]+lin_reg$coefficients[7]*dat[6]+lin_reg$coefficients[8]*dat[7]
 
+#Predicción con lm()
+Outcome2<-as.factor(Outcome)
 modelo <- lm(BMI ~ Pregnancies + Glucose + BloodPressure + SkinThickness 
           + DiabetesPedigreeFunction + Age) 
 
@@ -202,36 +205,70 @@ newdata$Insulin = 0;
 newdata = newdata[-c(6,9)]; #Eliminacion de columnas de BMI y Outcome
 
 pred = predict(modelo, newdata);
+print(pred)
 ```
 
 ## Punto 9
 
 ```{r}
-IC <-predict(modelo, newdata = newdata, interval = "confidence") #Intervalo de confianza por default es .95
+IC <-predict(modelo, newdata = newdata, interval = "confidence") #Intervalo de confianza de nivel 0.95 (por default) 
+IP <-predict(modelo, newdata = newdata, interval = "prediction") #Intervalo de prediccion de nivel 0.95 (por default) 
 ```
 
 ## Punto 10
 
 ## Punto 11
 
-```{r}
+Recordando los supuestos del modelo:
+
+1.  . Los errores tienen media cero E($\epsilon$)=0
+
+2.  Homocedasticidad: los errores tienen todos la misma varianza\
+    \
+    Var($\epsilon$)= $\sigma^2$
+
+3.  Los errores tienen distribución normal, son independientes entre sí y no están correlacionados con las variables de entrada
+
+Al tener un modelo multivariable es necesario analizar los residuos para comprender si los supuestos son válidos en el modelo propuesto. En principio, el mirar un gráfico de los residuos y reconocer patrones es un indicio de que el modelo no es adecuado. Deberían ser puntos distribuidos aleatoriamente con media cero.
+
+La visualización de los residuos se puede ver en el siguiente gráfico:
+
+```{r,results=TRUE, echo=TRUE}
 #Residuos unicamente
+
+residuals_std<-rstandard(modelo) #t-residuals
+
 ggplot(data=data, aes(x=1:length(modelo$residuals), y=modelo$residuals)) + 
   geom_point(col="gray0", fill="darkorchid3", alpha = .9) + 
   labs(title="Residuos", x="Indice", y="Valores") + xlim(c(0,length(modelo$residuals))) + ylim(c(min(modelo$residuals),max(modelo$residuals)))
 
+
+```
+
+```{r,results=TRUE}
+mean(modelo$residuals)
+```
+
+De donde podemos verificar que la media es nula, y el primer supuesto es válido.
+
+Además, sabemos que podemos comprar mediante un gráfico de
+
+```{r}
+
+# ggplot(data=data, aes(x=1:length(residuals_std), y=residuals_std)) + 
+#   geom_point(col="gray0", fill="darkorchid3", alpha = .9) + 
+#   labs(title="Residuos standard", x="Indice", y="Valores") + xlim(c(0,length(residuals_std))) + ylim(c(min(residuals_std),max(residuals_std)))
+
 #Residuos vs outcomes predichos
 
-# ggplot(data=data, aes(x=modelo$residuals, y=modelo$fitted.values)) + 
-#   geom_point(col="gray0", fill="darkorchid3", alpha = .9) + 
-#   labs(title="Residuos", x="BMI", y="Valores") + xlim(c(0,length(modelo$fitted.values))) + ylim(c(min(modelo$fitted.values),max(modelo$fitted.values)))
+ggplot(data=data, aes(x=modelo$fitted.values, y=modelo$residuals)) +    geom_point(col="gray0", fill="darkorchid3", alpha = .9) + 
+   labs(title="Residuos", x="BMI", y="Valores") + xlim(c(0,length(modelo$fitted.values))) + ylim(c(min(modelo$residuals),max(modelo$residuals)))
 
-ggplot(data=data, aes(x=modelo$residuals, y=modelo$fitted.values)) +    geom_point(col="gray0", fill="darkorchid3", alpha = .9) + 
-   labs(title="Residuos", x="BMI", y="Valores") + xlim(c(0,length(modelo$fitted.values))) + ylim(c(min(modelo$fitted.values),max(modelo$fitted.values)))
-
-qqnorm(modelo$residuals, col = "mediumpurple3", pch = 20, xlab = "Cuantiles teóricos", ylab = "Cuantiles estimados", main = "Comparación")
+qqnorm(modelo$residuals, col = "mediumpurple3", pch = 20, xlab = "Cuantiles teóricos", ylab = "Cuantiles estimados", main = "Normalidad de residuos")
 qqline(modelo$residuals, col="black")
 
-mean(modelo$residuals)
+#qqt(modelo$residuals, df = Inf)
+mean(residuals_std)
+
 sd(modelo$residuals)
 ```
