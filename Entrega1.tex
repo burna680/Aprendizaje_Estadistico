@@ -1,0 +1,700 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{lmodern}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\hypersetup{
+  pdftitle={Entrega1},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+\urlstyle{same} % disable monospaced font for URLs
+\usepackage[margin=1in]{geometry}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+
+\title{Entrega1}
+\author{}
+\date{\vspace{-2.5em}2022-05-26}
+
+\begin{document}
+\maketitle
+
+Todos los pacientes son de sexo femenino mayores de 21 años de herencia
+Pima. Para este primer estudio, lo que buscaremos es encontrar
+relaciones entre otras de las variables contenidas en el dataset.
+
+\hypertarget{punto-1}{%
+\subsection{Punto 1}\label{punto-1}}
+
+Se analizaron los datos y se llega a la conclusión de que todas las
+columnas se encuentran bien definidas.
+
+La columna X parecería ser un contador ya que es siempre ascendiente
+aunque faltan algunos numeros, podría ser un identificador de muestras.
+Por lo tanto no lo tomamos en cuenta para los análisis siguientes.
+
+Revisando los valores se nota que algunas filas tienen algunos valores
+en 0 que no tendrían mucho sentido en este contexto medicinal. Por
+ejemplo no se le encuentra mucho sentido que la presión sanguínea sea 0.
+Por lo tanto se comienza una exploración de datos para ver que
+porcentaje de los datos tienen valores en 0. Igualmente este análisis se
+deja para el punto 10 de selección de modelos.\\
+\strut \\
+
+\hypertarget{punto-2}{%
+\subsection{\texorpdfstring{\textbf{Punto 2}}{Punto 2}}\label{punto-2}}
+
+El modelo resulta
+
+\(\Omega\): Y= X\(\beta\)+\(\epsilon\)
+
+Cuyos supuestos son:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  Y \(\sim\) \(\mathcal{N}\)(X\(\beta\), \(\sigma^2I\)) , los valores de
+  BMI
+
+  Y \(\in\) \(\mathcal{R} ^{nx1}, n=539\) la cantidad de observaciones
+\item
+  \(E(Y|X=x)= \beta_0+\beta_1x_1+...+\beta_{p-1}x_{p-1}\))
+\item
+  \(Var(Y|X=x)\)= \(\sigma^2\)
+\item
+  \(Y_{1}, \ldots, Y_{n}\) son independientes
+
+  Al definir los elementos\\
+  \[
+  Y=\left(y_{1}, \ldots, y_{n}\right)^{T}, \epsilon=\left(\epsilon_{1}, \ldots, \epsilon_{n}\right)^{T}, \beta=\left(\beta_{1}, \ldots, \beta_{p}\right)^{T}
+  \]
+
+  \(\beta\in\) \(\mathcal{R} ^{px1}\)
+
+  X \(\in\) \(\mathcal{R} ^{nxp}, p= 8\) Es la matriz de diseño. La
+  cantidad de variables del modelo es p.~Incluyen la cantidad de
+  embarazos, el nivel de glucosa, etc.
+  \[\mathbf{X}=\left[\begin{array}{cccc}1 & x_{11} & \ldots & x_{1(p-1)} \\1 & \cdot & \cdot & \cdot \\1 & \cdot & \cdot & \cdot \\1 & \cdot & \cdot & \cdot \\1 & x_{n 1} & \ldots & x_{n(p-1)}\end{array}\right]\]
+
+  \hypertarget{punto-3}{%
+  \subsection{Punto 3}\label{punto-3}}
+\end{enumerate}
+
+La siguiente tabla muestra las correlaciones entre los distintos pares
+de variables del dataset. Se puede ver que en la última columna no se
+muestran los resultados como en las otras ya que la variable Outcome es
+una variable categórica.
+
+\begin{center}\includegraphics{Entrega1_files/figure-latex/unnamed-chunk-3-1} \end{center}
+
+\hypertarget{punto-4}{%
+\subsection{Punto 4}\label{punto-4}}
+
+Al ver la tabla podemos ver que existe una mayor correlación entre los
+valores de la SkinThickness y los de BMI, por lo que si tuviéramos que
+perder información eligiendo sólo una variable de las contenidas en el
+dataset sería la SkinThickness ya que sería un modelo de regresión
+lineal simple y la correlación da una noción de como explica una
+variable a la otra.
+
+\hypertarget{punto-5}{%
+\subsection{Punto 5}\label{punto-5}}
+
+\begin{verbatim}
+## 
+## Call:
+## lm(formula = data$BMI ~ vars, data = data)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -23.4933  -3.3207  -0.6014   3.1331  22.2634 
+## 
+## Coefficients:
+##                               Estimate Std. Error t value Pr(>|t|)    
+## (Intercept)                  13.977191   1.377092  10.150  < 2e-16 ***
+## varsGlucose                  -0.002452   0.008304  -0.295   0.7679    
+## varsPregnancies              -0.083276   0.085507  -0.974   0.3305    
+## varsBloodPressure             0.092145   0.017893   5.150 3.68e-07 ***
+## varsSkinThickness             0.378576   0.021711  17.437  < 2e-16 ***
+## varsInsulin                   0.004816   0.001987   2.424   0.0157 *  
+## varsDiabetesPedigreeFunction  0.897675   0.650422   1.380   0.1681    
+## varsAge                      -0.063677   0.028000  -2.274   0.0234 *  
+## varsOutcome                   2.184222   0.546829   3.994 7.40e-05 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 4.98 on 530 degrees of freedom
+## Multiple R-squared:  0.4825, Adjusted R-squared:  0.4747 
+## F-statistic: 61.78 on 8 and 530 DF,  p-value: < 2.2e-16
+\end{verbatim}
+
+En la anterior tabla se puede ver el resultado de la regresión lineal
+múltiple.
+
+En la parte de coeficientes cada fila expresa medidas de cada
+coeficiente de los parámetros estimados (\(\beta_i\)). La primer columna
+es el valor de la estimación, y después las otras tres columnas son
+tests de hipótesis para cada estimación de la siguiente forma:
+
+\[
+H_{0}: \beta_{i}=0 \quad V s . \quad H_{1}: \beta_{i} \neq 0
+\]
+
+La regla de decisión será
+
+\[
+\varphi(\underline{X})= \begin{cases}1 & \text { si } \quad|T|>k_{\alpha} \\ 0 & \text { en otro caso }\end{cases}
+\]
+
+Donde
+
+\[
+T=\frac{\hat{\beta_i}}{S \sqrt{d_{i i}}}, T ∼ t_{n - p}
+\]
+
+Donde S es la estimación (insesgada) del desvío estándar del estimador.
+
+Y \(d_{ii}\) es el elemento de la matriz
+\(D=\left(\mathbf{X}^{T} \mathbf{X}\right)^{-1}\)
+
+\(k_{\alpha}\) es una constante que depende de \(\alpha\) que es el
+nivel de significación del test.
+
+Por último el p-valor se calcula de la siguiente manera:
+
+\[
+p-\text { valor }=2 \mathbf{P}\left(T \geq\left|T_{o b s}\right|\right)
+\]
+
+Entonces la columna de Std. Error es la multiplicación de \(s\) y
+\(\sqrt{d_{ii}}\), t value es el valor obtenido del estadístico T, osea:
+\(\frac{\hat{\beta_i}}{s \sqrt{d_{i i}}}\)
+
+Y la última columna es el p valor obtenido para ese \(t\), osea:
+\(2 \mathbf{P}\left(T \geq\left|t\right|\right)\)
+
+Como ejemplo se toma la variable SkinThickness y se calcula a ``mano''
+los valores:
+
+\[S^{2}=\frac{\|Y-\hat{Y}\|^{2}}{n-p}\]
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{Y\_hat }\OtherTok{=} \FunctionTok{predict}\NormalTok{(lin\_reg)}
+\NormalTok{s }\OtherTok{=} \FunctionTok{sqrt}\NormalTok{(}\FunctionTok{norm}\NormalTok{(}\FunctionTok{as.matrix}\NormalTok{(data}\SpecialCharTok{$}\NormalTok{BMI }\SpecialCharTok{{-}}\NormalTok{ Y\_hat), }\AttributeTok{type =} \StringTok{"2"}\NormalTok{)}\SpecialCharTok{**}\DecValTok{2} \SpecialCharTok{/}\NormalTok{ (}\DecValTok{539} \SpecialCharTok{{-}} \DecValTok{8}\NormalTok{))}
+\NormalTok{s}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 4.975789
+\end{verbatim}
+
+Que es el mismo que aparece en la tabla como Residual Standar Error.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{X }\OtherTok{=} \FunctionTok{cbind}\NormalTok{(}\FunctionTok{rep}\NormalTok{(}\FunctionTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{), }\DecValTok{539}\NormalTok{), vars) }\CommentTok{\# vars contiene las columnas en el orden igual al que se hizo la regresion lineal}
+\NormalTok{D }\OtherTok{=} \FunctionTok{solve}\NormalTok{(}\FunctionTok{t}\NormalTok{(X) }\SpecialCharTok{\%*\%}\NormalTok{ X)}
+\NormalTok{d44 }\OtherTok{=}\NormalTok{ D[}\DecValTok{5}\NormalTok{, }\DecValTok{5}\NormalTok{] }\CommentTok{\# ya que el 0,0 sería el del intercept}
+\NormalTok{std\_err\_b4 }\OtherTok{=}\NormalTok{ (}\FunctionTok{sqrt}\NormalTok{(d44) }\SpecialCharTok{*}\NormalTok{ s)}
+\NormalTok{std\_err\_b4}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.02169034
+\end{verbatim}
+
+Que es el mismo valor que se obtiene en la tabla como Std. Error.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{t\_b4 }\OtherTok{=} \FunctionTok{unname}\NormalTok{(lin\_reg}\SpecialCharTok{$}\NormalTok{coefficients[}\StringTok{\textquotesingle{}varsSkinThickness\textquotesingle{}}\NormalTok{]}\SpecialCharTok{/}\NormalTok{std\_err\_b4)}
+\NormalTok{t\_b4}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 17.45366
+\end{verbatim}
+
+Que es el valor que se obtiene de la tabla como t value
+
+Por último se puede calcular el p valor usando la función de
+distribución de la t de Student
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\DecValTok{2}\SpecialCharTok{*}\NormalTok{(}\DecValTok{1} \SpecialCharTok{{-}} \FunctionTok{pt}\NormalTok{(t\_b4, }\DecValTok{539} \SpecialCharTok{{-}} \DecValTok{8}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0
+\end{verbatim}
+
+Ahora mirando todos los resultados se puede decidir que valores son
+significativos de la estimación y se decide que las variables con un
+valor significativo (\(p-valor < 0.05\)) del test son:
+
+\begin{itemize}
+\item
+  Intercept (\(\beta_0\))
+\item
+  BloodPressure
+\item
+  SkinThickness
+\item
+  Insulin
+\item
+  DiabetesPedigreeFunction
+\end{itemize}
+
+\hypertarget{punto-6}{%
+\subsection{Punto 6}\label{punto-6}}
+
+\[
+R^{2}=\frac{\|\hat{Y}-\bar{Y}\|^{2}}{\|Y-\bar{Y}\|^{2}}=\frac{S C R}{S C T}= 0.4669
+\]
+
+Donde \(\hat Y\) es la estimación de \(Y\) e \(\bar Y\) es la media. El
+\(R^2\) da una medida de la capacidad de ajuste del modelo, es decir que
+da una noción de cuanta variabilidad de \(Y\) queda explicada por el
+modelo. Cuando el valor se encuentra más cercano a 1 quiere decir que el
+modelo explica mejor la variabilidad.
+
+A medida que se agregan variables al modelo este valor siempre crece, a
+pesar de que estas nuevas variable no aporten a la estimación. Por eso
+es que cuando se quiere comparar dos modelos es preferible usar el
+coeficiente de determinación ajustado como:
+
+\[
+R_{a}^{2}=1-\frac{n-1}{n-p} \frac{\|Y-\hat{Y}\|^{2}}{\|Y-\bar{Y}\|^{2}}=1-\left(1-R^{2}\right) \frac{n}{n-p}
+\]
+
+\hypertarget{punto-7}{%
+\subsection{Punto 7}\label{punto-7}}
+
+Si se quiere analizar si la regresión es significativa se puede hacer el
+siguiente test
+
+\[H_{0}: \beta_{1}=\cdots=\beta_{p-1}=0 \quad \text { Vs. } \quad H_{1}: \text { Algun } \quad \beta_{i} \neq 0, \quad i=1, \ldots, p-1\]
+
+\[
+\varphi(\underline{X})= \begin{cases}1 & \text { si } \quad F>\mathcal{F}_{p-1, n-p, 1-\alpha} \\ 0 & \text { en otro caso }\end{cases}
+\]
+
+Donde:
+
+\[
+F=\frac{(C \hat{\beta})^{T}\left(C\left(\mathbf{X}^{T} \mathbf{X}\right)^{-1} C^{T}\right)^{-1}(C \hat{\beta})}{(p - 1) S^{2}} 
+\]
+
+Con:
+
+\[
+\mathbf{C}=\left[\begin{array}{ccc}0 & 1 \ldots & 0 \\0 & . & . \\. & . & \cdot \\. & \cdot & \cdot \\0 & \ldots & 1\end{array}\right] ; C\in \mathcal{R}^{(p-1)\times p}
+\]
+
+Que representa la manera que está armado el test
+(\(\beta_{1}=0 ; \beta_{2}=0 ...\))
+
+En este caso el p-valor se calcula como:
+
+\[
+p-\text { valor }=\mathbf{P}\left(F \geq F_{o b s}\right), \quad F \sim \mathcal{F}_{p - 1, n-p}
+\]
+
+Por lo tanto en este caso el p-valor está tan cercano a 0 que significa
+que la regresión es significativa.
+
+\hypertarget{punto-8}{%
+\subsection{Punto 8}\label{punto-8}}
+
+En el caso de querer obtener una estimación de la esperanza para el BMI,
+para una mujer que tuvo 2 embarazos, concentración de glucosa de 100,
+presión sanguínea de 70, piel de triceps de 20, sin diabetes, un valor
+de la función pedigree de 0.24 y 30 años usamos el modelo creado en el
+punto 5, cuyo valor resulta:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{predict}\NormalTok{(modelo, newdata)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##        1 
+## 28.61348
+\end{verbatim}
+
+\hypertarget{punto-9}{%
+\subsection{Punto 9}\label{punto-9}}
+
+Dado el modelo descrito en el punto 2, se quiere obtener un intervalo de
+confianza para la estimación de la esperanza de una nueva observación
+\(\mathbf{E}\left(Y_{0}\right)=x_{0}^{T} \beta\)\\
+\strut \\
+Para ello tenemos en cuenta el desarrollo del método del pivote
+utilizando
+\[T=\frac{\hat{Y}_{0}-x_{0}^{T} \beta}{S \sqrt{x_{0}^{T}\left(\mathbf{X}^{T} \mathbf{X}\right)^{-1} x_{0}}} \sim t_{n-p}\]
+
+que resulta en un intervalo de confianza
+
+\[ I C_{1-0.05}=\left[\hat{y_{0}}-t_{n-p, 1-\alpha / 2} S \sqrt{x_{0}^{T}\left(\mathbf{X}^{T} \mathbf{X}\right)^{-1} x_{0}} ; \hat{y}_{0}+t_{n-p, 1-\alpha / 2} S \sqrt{x_{0}^{T}\left(\mathbf{X}^{T} \mathbf{X}\right)^{-1} x_{0}}\right] \]
+
+Puesto que el nivel que necesitamos es 0,95, el resultado es
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{predict}\NormalTok{(modelo, }\AttributeTok{newdata =}\NormalTok{ newdata, }\AttributeTok{interval =} \StringTok{"confidence"}\NormalTok{) }\CommentTok{\#Intervalo de confianza de nivel 0.95 (por default) }
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##        fit      lwr      upr
+## 1 28.61348 27.91714 29.30982
+\end{verbatim}
+
+Además se desea un intervalo de predicción para la variable
+\[\hat{Y}_{0}=x_{0}^{T} \hat{\beta}\],
+\[ \hat{Y}_{0} \sim \mathcal{N}\left(x_{0}^{T} \beta, \sigma^{2} x_{0}^{T}\left(\mathbf{X}^{T} \mathbf{X}\right)^{-1} x_{0}\right)\]
+
+Nuevamente utilizando el método del pivote, resulta que el intervalo de
+predicción es:
+\[I C_{1-0.05}=\left[\hat{y}_{0}-t_{n-p, 1-\alpha / 2} S \sqrt{1+x_{0}^{T}\left(\mathbf{X}^{T} \mathbf{X}\right)^{-1} x_{0}} ; \hat{y}_{0}+t_{n-p, 1-\alpha / 2} S \sqrt{1+x_{0}^{T}\left(\mathbf{X}^{T} \mathbf{X}\right)^{-1} x_{0}}\right] \]
+
+y el resultado:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{predict}\NormalTok{(modelo, }\AttributeTok{newdata =}\NormalTok{ newdata, }\AttributeTok{interval =} \StringTok{"prediction"}\NormalTok{) }\CommentTok{\#Intervalo de prediccion de nivel 0.95 (por default) }
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##        fit      lwr     upr
+## 1 28.61348 18.62647 38.6005
+\end{verbatim}
+
+Vemos que el intervalo de predicción es mayor que el de confianza,
+resultado esperado al tratar de obtener una predicción de un valor
+exacto.
+
+\hypertarget{punto-10}{%
+\subsection{Punto 10}\label{punto-10}}
+
+Para la selección de modelos se consideran todas las posibles
+combinaciones de variables para poder encontrar el mejor de los modelos.
+Para considerar cual es el mejor es necesario definir métricas.
+
+Se utilizaran 3 métricas:
+
+\begin{itemize}
+\item
+  \[
+  R_{a}^{2}=1-\frac{n-1}{n-p} \frac{\|Y-\hat{Y}\|^{2}}{\|Y-\bar{Y}\|^{2}}
+  \]
+\item
+  \[
+  C p=\frac{\left\|Y-\hat{Y}_{p}\right\|^{2}}{S^{2}}+2 p-n, \quad \quad S^{2}=\frac{\left\|Y-\hat{Y}_{k}\right\|^{2}}{n-k}
+  \]
+\item
+  \[
+  \widehat{E C M}=\frac{1}{n} \sum_{i=1}^{n} r_{-i}^{2}=\frac{1}{n} \sum_{i=1}^{n} \frac{r^{2}}{\left(1-p_{i i}\right)^{2}}
+  \]
+\end{itemize}
+
+La bondad de ajuste está dada por el \(R_{a}^{2}\), mientras que la
+bondad de predicción está dada por el \(C_p\) . Otra métrica también
+utilizada es el error cuadrático medio para verificar cuanto se aleja la
+estimación de la medición, para este caso se usó el método de CV para
+medir esta métrica.
+
+\begin{center}\includegraphics{Entrega1_files/figure-latex/unnamed-chunk-13-1} \end{center}
+
+Utilizando la función regsubsets con el metodo exhaustivo se obtuvieron
+los mejores (se queda con el modelo con mayor F) modelos para la
+cantidad de variables. En el gráfico de arriba se pueden ver como cambia
+el \(R_{a}^{2}\) y el \(C_p\) a medida que cambian la cantidad de
+variables. De aquí se podría considerar que el óptimo se obtiene con 5
+variables, pero no hay mucha diferencia con los menores. Teniendo en
+cuenta de que se prefiere usar menor cantidad de variables se podría
+tomar el de 4 o 3.
+
+\begin{verbatim}
+## Subset selection object
+## Call: stepwise(data)
+## 8 Variables  (and intercept)
+##                              Forced in Forced out
+## varsGlucose                      FALSE      FALSE
+## varsPregnancies                  FALSE      FALSE
+## varsBloodPressure                FALSE      FALSE
+## varsSkinThickness                FALSE      FALSE
+## varsInsulin                      FALSE      FALSE
+## varsDiabetesPedigreeFunction     FALSE      FALSE
+## varsAge                          FALSE      FALSE
+## varsOutcome                      FALSE      FALSE
+## 1 subsets of each size up to 8
+## Selection Algorithm: exhaustive
+##          varsGlucose varsPregnancies varsBloodPressure varsSkinThickness
+## 1  ( 1 ) " "         " "             " "               "*"              
+## 2  ( 1 ) " "         " "             "*"               "*"              
+## 3  ( 1 ) " "         " "             "*"               "*"              
+## 4  ( 1 ) " "         " "             "*"               "*"              
+## 5  ( 1 ) " "         " "             "*"               "*"              
+## 6  ( 1 ) " "         " "             "*"               "*"              
+## 7  ( 1 ) " "         "*"             "*"               "*"              
+## 8  ( 1 ) "*"         "*"             "*"               "*"              
+##          varsInsulin varsDiabetesPedigreeFunction varsAge varsOutcome
+## 1  ( 1 ) " "         " "                          " "     " "        
+## 2  ( 1 ) " "         " "                          " "     " "        
+## 3  ( 1 ) " "         " "                          " "     "*"        
+## 4  ( 1 ) " "         " "                          "*"     "*"        
+## 5  ( 1 ) "*"         " "                          "*"     "*"        
+## 6  ( 1 ) "*"         "*"                          "*"     "*"        
+## 7  ( 1 ) "*"         "*"                          "*"     "*"        
+## 8  ( 1 ) "*"         "*"                          "*"     "*"
+\end{verbatim}
+
+En esta tabla se puede ver cuales variables se utilizan para la cantidad
+de variables.
+
+Para calcular el error cuadratico medio en cambio se usa la función
+bestglm ya que elije el mejor modelo (en este caso se le puede pedir que
+el mejor sea el que tenga menor ECM) usando cross validation.
+
+\begin{verbatim}
+##    (Intercept) Glucose Pregnancies BloodPressure SkinThickness Insulin
+## 0         TRUE   FALSE       FALSE         FALSE         FALSE   FALSE
+## 1         TRUE   FALSE       FALSE         FALSE          TRUE   FALSE
+## 2         TRUE   FALSE       FALSE          TRUE          TRUE   FALSE
+## 3         TRUE   FALSE       FALSE          TRUE          TRUE   FALSE
+## 4*        TRUE   FALSE       FALSE          TRUE          TRUE   FALSE
+## 5         TRUE   FALSE       FALSE          TRUE          TRUE    TRUE
+## 6         TRUE   FALSE       FALSE          TRUE          TRUE    TRUE
+## 7         TRUE   FALSE        TRUE          TRUE          TRUE    TRUE
+## 8         TRUE    TRUE        TRUE          TRUE          TRUE    TRUE
+##    DiabetesPedigreeFunction   Age Outcome logLikelihood       CV
+## 0                     FALSE FALSE   FALSE    -1038.3862 47.71661
+## 1                     FALSE FALSE   FALSE     -891.4980 28.45337
+## 2                     FALSE FALSE   FALSE     -880.9594 28.02482
+## 3                     FALSE FALSE    TRUE     -872.7179 27.50207
+## 4*                    FALSE  TRUE    TRUE     -866.2922 27.24904
+## 5                     FALSE  TRUE    TRUE     -862.3907 27.29241
+## 6                      TRUE  TRUE    TRUE     -861.3503 27.49842
+## 7                      TRUE  TRUE    TRUE     -860.8852 28.04365
+## 8                      TRUE  TRUE    TRUE     -860.8408 28.32924
+\end{verbatim}
+
+Este algoritmo encuentra que el mejor modelo (el que minimiza el ECM) es
+el de 4 variables.
+
+Comparando los dos resultados elegimos el de 5 variables (en este caso
+dieron iguales) ya que para el segundo análisis no se encuentra muy
+alejado del mínimo, y para el primer análisis se encuentra cerca del
+óptimo.
+
+El modelo entonces resulta con los siguientes estimadores:
+
+\hypertarget{punto-11}{%
+\subsection{Punto 11}\label{punto-11}}
+
+Recordando los supuestos del modelo:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  . Los errores tienen media cero E(\(\epsilon\))=0
+\item
+  Homocedasticidad: los errores tienen todos la misma varianza\\
+  \strut \\
+  Var(\(\epsilon\))= \(\sigma^2\)
+\item
+  Los errores tienen distribución normal, son independientes entre sí y
+  no están correlacionados con las variables de entrada
+\end{enumerate}
+
+Que también se pueden ver como
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  Y \(\sim\) \(\mathcal{N}\)(X\(\beta\), \(\sigma^2I\))
+\item
+  \(E(Y|X=x)= \beta_0+\beta_1x_1+...+\beta_{p-1}x_{p-1}\)
+\item
+  \(Var(Y|X=x)\)= \(\sigma^2\)
+\item
+  \(Y_{1}, \ldots, Y_{n}\) son independientes
+\end{enumerate}
+
+Al tener un modelo multivariable es necesario analizar los residuos para
+comprender si los supuestos son válidos en el modelo propuesto. En
+principio, el mirar un gráfico de los residuos y reconocer patrones es
+un indicio de que el modelo no es adecuado. Deberían ser puntos
+distribuidos aleatoriamente con media cero.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{par}\NormalTok{(}\AttributeTok{mfrow =} \FunctionTok{c}\NormalTok{(}\DecValTok{2}\NormalTok{, }\DecValTok{2}\NormalTok{))}
+\FunctionTok{plot}\NormalTok{(modelo)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{center}\includegraphics{Entrega1_files/figure-latex/unnamed-chunk-17-1} \end{center}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# }
+\CommentTok{\# residuals\_std\textless{}{-}rstandard(modelo) \#t{-}residuals}
+\CommentTok{\# }
+\CommentTok{\# ggplot(data=data, aes(x=1:length(modelo$residuals), y=modelo$residuals)) + }
+\CommentTok{\#   geom\_point(col="gray0", fill="darkorchid3", alpha = .9) + }
+\CommentTok{\#   labs(title="Residuos", x="Indice", y="Valores") + xlim(c(0,length(modelo$residuals))) + ylim(c(min(modelo$residuals),max(modelo$residuals)))}
+\end{Highlighting}
+\end{Shaded}
+
+En el gráfico superior izquierdo se puede verificar que la media es
+nula, y el supuesto de linealidad es válido.
+
+Además, sabemos que podemos comprar ,mediante el gráfico superior
+derecho, la normalidad de los supuestos. Vemos que los residuos siguen
+una distribución normal.
+
+Luego, con el gráfico inferior izquierdo podemos comprobar la
+homeocedasticidad, puesto que la varianza de los residuos es
+relativamente constante.
+
+Con el gráfico inferior derecho se verifica la presencia de outliers,
+que son valores extremos dentro de nuestro set y que pueden afectar al
+Residual Standar Error.
+
+\hypertarget{punto-12}{%
+\subsection{Punto 12}\label{punto-12}}
+
+Como se había elegido la columna SkinThickness, se realiza el bootstrap
+no paramétrico y como remuestra se toma la salida de la regresión
+simple. Se toman 10000 muestras del estimador y se gráfica la densidad
+usando nucleo gaussiano, se compara contra una normal y se calculan la
+media y el desvío estandard.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{mean}\NormalTok{(estimations)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.4275675
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{var}\NormalTok{(estimations)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.001382514
+\end{verbatim}
+
+\begin{center}\includegraphics{Entrega1_files/figure-latex/unnamed-chunk-20-1} \end{center}
+
+\begin{center}\includegraphics{Entrega1_files/figure-latex/unnamed-chunk-21-1} \end{center}
+
+Se puede notar que es similar a una gaussiana, esto es útil ya que
+indica que el valor no varía mucho.
+
+\end{document}
