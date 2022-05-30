@@ -1,13 +1,17 @@
 ---
 title: "Entrega1"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 date: '2022-05-26'
-editor_options: 
+editor_options:
   chunk_output_type: inline
+  fig_width: 6
+  fig_height: 4
 ---
 
 ```{r setup, include=FALSE, results=FALSE}
-knitr::opts_chunk$set(echo = FALSE, results = FALSE, warning=FALSE, message=FALSE)
+knitr::opts_chunk$set(echo = FALSE, results = FALSE, warning=FALSE, message=FALSE, fig.align = "center", fig.width=12, fig.height=8)
 ```
 
 ```{r pressure}
@@ -18,8 +22,8 @@ library(gridExtra) #For subplots with ggplot
 library(hrbrthemes)
 library(latex2exp)
 library(leaps)
-library(qqplotr)
 source("functions.R")
+library(bestglm)
 ```
 
 Todos los pacientes son de sexo femenino mayores de 21 años de herencia Pima. Para este primer estudio, lo que buscaremos es encontrar relaciones entre otras de las variables contenidas en el dataset.
@@ -33,9 +37,7 @@ if(Sys.info()[['sysname']] == "Windows"){
   setwd("~/Desktop/Facultad/Aprendizaje_estadistico/TP1")
 }
   
-
 data<-read.csv("diabetes2.csv",header=T,sep=",")
-attach(data)
 data$Outcome<-as.factor(data$Outcome)
 ```
 
@@ -47,36 +49,8 @@ La columna X parecería ser un contador ya que es siempre ascendiente aunque fal
 data = within(data, rm(X))
 ```
 
-Revisando los valores se nota que algunas filas tienen algunos valores en 0 que no tendrían mucho sentido en este contexto medicinal. Por ejemplo no se le encuentra mucho sentido que la presión sanguínea sea 0. Por lo tanto se comienza una exploración de datos para ver que porcentaje de los datos tienen valores en 0.\
+Revisando los valores se nota que algunas filas tienen algunos valores en 0 que no tendrían mucho sentido en este contexto medicinal. Por ejemplo no se le encuentra mucho sentido que la presión sanguínea sea 0. Por lo tanto se comienza una exploración de datos para ver que porcentaje de los datos tienen valores en 0. Igualmente este análisis se deja para el punto 10 de selección de modelos.\
 \
-Se considera que solo las columnas de Glucosa, Presión Sanguínea, Insulina y la Edad no pueden ser 0.
-
-```{r, results = TRUE}
-missing_data = count_missing_values(data, c('Glucose', 'BloodPressure', 'Insulin', 'Age'), 0, equals)
-missing_data * 100 / nrow(data)
-```
-
-Por otro lado se enti
-
-```{r, results = TRUE}
-missing_data = count_missing_values(data, c('DiabetesPedigreeFunction'), 1, greater_than)
-missing_data * 100 / nrow(data)
-```
-
-edad
-
-```{r, results = TRUE}
-missing_data = count_missing_values(data, c('Age'), 21, less_than)
-missing_data * 100 / nrow(data)
-```
-
-Se muestran el porcentaje de valores nulos de cada columna. Para Glucosa y Presión Sanguínea no representa una porción grande de los datos por lo que podríamos quitar esas líneas, pero para la Insulina en cambio si. En los siguientes probaremos formas de tratar estos datos:
-
--   Eliminar esas filas como hicimos con las otras columnas.
-
--   Asignarles valores en función de alguna métrica como por ejemplo la media.
-
-Para el caso de DiabetesPedigreeFunction también decidimos quitarlos.
 
 ## **Punto 2**
 
@@ -90,9 +64,9 @@ Cuyos supuestos son:
 
     Y $\in$ $\mathcal{R} ^{nx1}, n=539$ la cantidad de observaciones
 
-2.  E($\epsilon$)=0 , $\epsilon\in$ $\mathcal{R} ^{nx1}$
+2.  $E(Y|X=x)= \beta_0+\beta_1x_1+...+\beta_{p-1}x_{p-1}$)
 
-3.  Var($\epsilon$)= $\sigma^2$
+3.  $Var(Y|X=x)$= $\sigma^2$
 
 4.  $Y_{1}, \ldots, Y_{n}$ son independientes
 
@@ -105,9 +79,13 @@ Cuyos supuestos son:
 
     X $\in$ $\mathcal{R} ^{nxp}, p= 8$ Es la matriz de diseño. La cantidad de variables del modelo es p. Incluyen la cantidad de embarazos, el nivel de glucosa, etc. $$\mathbf{X}=\left[\begin{array}{cccc}1 & x_{11} & \ldots & x_{1(p-1)} \\1 & \cdot & \cdot & \cdot \\1 & \cdot & \cdot & \cdot \\1 & \cdot & \cdot & \cdot \\1 & x_{n 1} & \ldots & x_{n(p-1)}\end{array}\right]$$
 
-Cuál es el modelo propuesto? verificar los puntos de BMI con qqnorm
+    <div>
 
-## Punto 3
+    ## Punto 3
+
+    </div>
+
+La siguiente tabla muestra las correlaciones entre los distintos pares de variables del dataset. Se puede ver que en la última columna no se muestran los resultados como en las otras ya que la variable Outcome es una variable categórica.
 
 ```{r}
 ggpairs(data)
@@ -115,49 +93,98 @@ ggpairs(data)
 
 ## Punto 4
 
-Al ver los outcomes podemos ver que existe una mayor correlación entre los valores de la SkinThickness y los de BMI, por lo que si tuvieramos que perder información eligiendo sólo una variable de las contenidas en el dataset sería la SkinThickness
+Al ver la tabla podemos ver que existe una mayor correlación entre los valores de la SkinThickness y los de BMI, por lo que si tuviéramos que perder información eligiendo sólo una variable de las contenidas en el dataset sería la SkinThickness ya que sería un modelo de regresión lineal simple y la correlación da una noción de como explica una variable a la otra.
 
 ## Punto 5
 
-```{r}
-vars = cbind(Glucose, Pregnancies, BloodPressure, SkinThickness, Insulin, DiabetesPedigreeFunction, Age)
-
-exhaustive<-regsubsets(data$BMI~vars,data = data, method = "exhaustive")
-summary(exhaustive)
-
-par(mfrow=c(2,2))
-plot(summary(exhaustive)$rss,pch=20,xlab="Modelo", ylab= "RSS")
-plot(summary(exhaustive)$rsq,pch=20,xlab="Modelo", ylab= "R^2")
-plot(summary(exhaustive)$adjr2,pch=20,xlab="Modelo", ylab= "R^2 aj")
-plot(summary(exhaustive)$cp,pch=20,xlab="Modelo", ylab= "CP")
-abline(0,1)
-par(mfrow=c(1,1))
-lin_reg<-lm(data$BMI~vars,data = data)
+```{r, results = TRUE}
+vars = cbind(Glucose = data$Glucose, Pregnancies = data$Pregnancies, BloodPressure = data$BloodPressure, SkinThickness = data$SkinThickness, Insulin = data$Insulin, DiabetesPedigreeFunction = data$DiabetesPedigreeFunction, Age = data$Age, Outcome= data$Outcome)
+lin_reg = lm(data$BMI~vars, data = data)
+summary(lin_reg)
 ```
 
-Multiple R-squared: 0.466 es el coeficiente de determinación.
+En la anterior tabla se puede ver el resultado de la regresión lineal múltiple.
 
-$\textit{¿Qué variables resultan significativas?}$
+En la parte de coeficientes cada fila expresa medidas de cada coeficiente de los parámetros estimados ($\beta_i$). La primer columna es el valor de la estimación, y después las otras tres columnas son tests de hipótesis para cada estimación de la siguiente forma:
 
-Se realiza un test de hipótesis por cada variable a estimar, que representan los $\beta_i$. Para ver las variables de interés tenemos que mirar el p-valor de vada una de ellas. Vemos que todas excepto la glucosa y la cantidad de embarazos son los que tienen el p-valor mayor.
+$$
+H_{0}: \beta_{i}=0 \quad V s . \quad H_{1}: \beta_{i} \neq 0
+$$
 
-\$\\textit{
+La regla de decisión será
 
-¿Cuál es el valor de la estimación para $\sigma ^2$?}\$
+$$
+\varphi(\underline{X})= \begin{cases}1 & \text { si } \quad|T|>k_{\alpha} \\ 0 & \text { en otro caso }\end{cases}
+$$
 
-Se mira con "summary(lin_reg)\$sigma".
+Donde
 
-$\textit{ Especificar las hipótesis nulas y alternativas para alguno de los test t reportados en la tabla, el estadístico deltest y la regla de decisión}$
+$$
+T=\frac{\hat{\beta_i}}{S \sqrt{d_{i i}}}, T ∼ t_{n - p}
+$$
 
-Las hiótesis nulas están dadas por CREO QUE ACA NO VA ESTO VA EN EL 7
+Donde S es la estimación (insesgada) del desvío estándar del estimador.
 
-$$H_{0}: \beta_{1}=\cdots=\beta_{p-1}=0 \quad \text { Vs. } \quad H_{1}: \text { Algun } \quad \beta_{i} \neq 0, \quad i=1, \ldots, p-1$$
+Y $d_{ii}$ es el elemento de la matriz $D=\left(\mathbf{X}^{T} \mathbf{X}\right)^{-1}$
 
-Con lo cual estamos verificando que nuestro modelo lineal sea relevante por sobre la estimación de la esperanza, es decir si el modelo conviene por sobre el promedio.\
-\
-En particular, al analizar la glucosa \$\\textit{
+$k_{\alpha}$ es una constante que depende de $\alpha$ que es el nivel de significación del test.
 
-¿Cómo se calcula el p-valor para este test?}\$
+Por último el p-valor se calcula de la siguiente manera:
+
+$$
+p-\text { valor }=2 \mathbf{P}\left(T \geq\left|T_{o b s}\right|\right)
+$$
+
+Entonces la columna de Std. Error es la multiplicación de $s$ y $\sqrt{d_{ii}}$, t value es el valor obtenido del estadístico T, osea: $\frac{\hat{\beta_i}}{s \sqrt{d_{i i}}}$
+
+Y la última columna es el p valor obtenido para ese $t$, osea: $2 \mathbf{P}\left(T \geq\left|t\right|\right)$
+
+Como ejemplo se toma la variable SkinThickness y se calcula a "mano" los valores:
+
+$$S^{2}=\frac{\|Y-\hat{Y}\|^{2}}{n-p}$$
+
+```{r, results=TRUE, echo=TRUE}
+Y_hat = predict(lin_reg)
+s = sqrt(norm(as.matrix(data$BMI - Y_hat), type = "2")**2 / (539 - 8))
+s
+```
+
+Que es el mismo que aparece en la tabla como Residual Standar Error.
+
+```{r, results=TRUE, echo=TRUE}
+X = cbind(rep(c(1), 539), vars) # vars contiene las columnas en el orden igual al que se hizo la regresion lineal
+D = solve(t(X) %*% X)
+d44 = D[5, 5] # ya que el 0,0 sería el del intercept
+std_err_b4 = (sqrt(d44) * s)
+std_err_b4
+```
+
+Que es el mismo valor que se obtiene en la tabla como Std. Error.
+
+```{r, results=TRUE, echo=TRUE}
+t_b4 = unname(lin_reg$coefficients['varsSkinThickness']/std_err_b4)
+t_b4
+```
+
+Que es el valor que se obtiene de la tabla como t value
+
+Por último se puede calcular el p valor usando la función de distribución de la t de Student
+
+```{r, results=TRUE, echo=TRUE}
+2*(1 - pt(t_b4, 539 - 8))
+```
+
+Ahora mirando todos los resultados se puede decidir que valores son significativos de la estimación y se decide que las variables con un valor significativo ($p-valor < 0.05$) del test son:
+
+-   Intercept ($\beta_0$)
+
+-   BloodPressure
+
+-   SkinThickness
+
+-   Insulin
+
+-   DiabetesPedigreeFunction
 
 ## Punto 6
 
@@ -175,24 +202,47 @@ $$
 
 ## Punto 7
 
+Si se quiere analizar si la regresión es significativa se puede hacer el siguiente test
+
 $$H_{0}: \beta_{1}=\cdots=\beta_{p-1}=0 \quad \text { Vs. } \quad H_{1}: \text { Algun } \quad \beta_{i} \neq 0, \quad i=1, \ldots, p-1$$
 
-si rechazo, discutir
+$$
+\varphi(\underline{X})= \begin{cases}1 & \text { si } \quad F>\mathcal{F}_{p-1, n-p, 1-\alpha} \\ 0 & \text { en otro caso }\end{cases}
+$$
+
+Donde:
+
+$$
+F=\frac{(C \hat{\beta})^{T}\left(C\left(\mathbf{X}^{T} \mathbf{X}\right)^{-1} C^{T}\right)^{-1}(C \hat{\beta})}{(p - 1) S^{2}} 
+$$
+
+Con:
+
+$$
+\mathbf{C}=\left[\begin{array}{ccc}0 & 1 \ldots & 0 \\0 & . & . \\. & . & \cdot \\. & \cdot & \cdot \\0 & \ldots & 1\end{array}\right] ; C\in \mathcal{R}^{(p-1)\times p}
+$$
+
+Que representa la manera que está armado el test ($\beta_{1}=0 ; \beta_{2}=0 ...$)
+
+En este caso el p-valor se calcula como:
+
+$$
+p-\text { valor }=\mathbf{P}\left(F \geq F_{o b s}\right), \quad F \sim \mathcal{F}_{p - 1, n-p}
+$$
+
+Por lo tanto en este caso el p-valor está tan cercano a 0 que significa que la regresión es significativa.
 
 ## Punto 8
 
 En el caso de querer obtener una estimación de la esperanza para el BMI, para una mujer que tuvo 2 embarazos, concentración de glucosa de 100, presión sanguínea de 70, piel de triceps de 20, sin diabetes, un valor de la función pedigree de 0.24 y 30 años usamos el modelo creado en el punto 5, cuyo valor resulta:
 
-```{r}
+```{r, results=TRUE}
 #Predicción manual
-dat=c(100,2,70,20,0,0.24,30 )
-
-prediction_=lin_reg$coefficients[1]+lin_reg$coefficients[2]*dat[1]+lin_reg$coefficients[3]*dat[2]+lin_reg$coefficients[4]*dat[3]+lin_reg$coefficients[5]*dat[4]+lin_reg$coefficients[6]*dat[5]+lin_reg$coefficients[7]*dat[6]+lin_reg$coefficients[8]*dat[7]
+attach(data)
 
 #Predicción con lm()
-Outcome2<-as.factor(Outcome)
-modelo <- lm(BMI ~ Pregnancies + Glucose + BloodPressure + SkinThickness 
-          + DiabetesPedigreeFunction + Age) 
+modelo <- lm(BMI ~ Pregnancies + Glucose + BloodPressure + SkinThickness
+          + DiabetesPedigreeFunction + Age)
 
 newdata <- data[1, ];
 newdata$Pregnancies = 2;
@@ -202,20 +252,97 @@ newdata$SkinThickness = 20;
 newdata$DiabetesPedigreeFunction = 0.24;
 newdata$Age = 30;
 newdata$Insulin = 0;
+newdata$Outcome = 0;
 newdata = newdata[-c(6,9)]; #Eliminacion de columnas de BMI y Outcome
 
-pred = predict(modelo, newdata);
-print(pred)
+```
+
+```{r, results=TRUE, echo=TRUE}
+
+predict(modelo, newdata)
+
 ```
 
 ## Punto 9
 
-```{r}
-IC <-predict(modelo, newdata = newdata, interval = "confidence") #Intervalo de confianza de nivel 0.95 (por default) 
-IP <-predict(modelo, newdata = newdata, interval = "prediction") #Intervalo de prediccion de nivel 0.95 (por default) 
+Dado el modelo descrito en el punto 2, se quiere obtener un intervalo de confianza para la estimación de la esperanza de una nueva observación $\mathbf{E}\left(Y_{0}\right)=x_{0}^{T} \beta$\
+\
+Para ello tenemos en cuenta el desarrollo del método del pivote utilizando $$T=\frac{\hat{Y}_{0}-x_{0}^{T} \beta}{S \sqrt{x_{0}^{T}\left(\mathbf{X}^{T} \mathbf{X}\right)^{-1} x_{0}}} \sim t_{n-p}$$
+
+que resulta en un intervalo de confianza
+
+$$ I C_{1-0.05}=\left[\hat{y_{0}}-t_{n-p, 1-\alpha / 2} S \sqrt{x_{0}^{T}\left(\mathbf{X}^{T} \mathbf{X}\right)^{-1} x_{0}} ; \hat{y}_{0}+t_{n-p, 1-\alpha / 2} S \sqrt{x_{0}^{T}\left(\mathbf{X}^{T} \mathbf{X}\right)^{-1} x_{0}}\right] $$
+
+Puesto que el nivel que necesitamos es 0,95, el resultado es
+
+```{r, results=TRUE, echo=TRUE}
+predict(modelo, newdata = newdata, interval = "confidence") #Intervalo de confianza de nivel 0.95 (por default) 
+
 ```
 
+Además se desea un intervalo de predicción para la variable $$\hat{Y}_{0}=x_{0}^{T} \hat{\beta}$$, $$ \hat{Y}_{0} \sim \mathcal{N}\left(x_{0}^{T} \beta, \sigma^{2} x_{0}^{T}\left(\mathbf{X}^{T} \mathbf{X}\right)^{-1} x_{0}\right)$$
+
+Nuevamente utilizando el método del pivote, resulta que el intervalo de predicción es: $$I C_{1-0.05}=\left[\hat{y}_{0}-t_{n-p, 1-\alpha / 2} S \sqrt{1+x_{0}^{T}\left(\mathbf{X}^{T} \mathbf{X}\right)^{-1} x_{0}} ; \hat{y}_{0}+t_{n-p, 1-\alpha / 2} S \sqrt{1+x_{0}^{T}\left(\mathbf{X}^{T} \mathbf{X}\right)^{-1} x_{0}}\right] $$
+
+y el resultado:
+
+```{r, results=TRUE, echo=TRUE}
+predict(modelo, newdata = newdata, interval = "prediction") #Intervalo de prediccion de nivel 0.95 (por default) 
+```
+
+Vemos que el intervalo de predicción es mayor que el de confianza, resultado esperado al tratar de obtener una predicción de un valor exacto.
+
 ## Punto 10
+
+Para la selección de modelos se consideran todas las posibles combinaciones de variables para poder encontrar el mejor de los modelos. Para considerar cual es el mejor es necesario definir métricas.
+
+Se utilizaran 3 métricas:
+
+-   $$
+    R_{a}^{2}=1-\frac{n-1}{n-p} \frac{\|Y-\hat{Y}\|^{2}}{\|Y-\bar{Y}\|^{2}}
+    $$
+
+-   $$
+    C p=\frac{\left\|Y-\hat{Y}_{p}\right\|^{2}}{S^{2}}+2 p-n, \quad \quad S^{2}=\frac{\left\|Y-\hat{Y}_{k}\right\|^{2}}{n-k}
+    $$
+
+-   $$
+    \widehat{E C M}=\frac{1}{n} \sum_{i=1}^{n} r_{-i}^{2}=\frac{1}{n} \sum_{i=1}^{n} \frac{r^{2}}{\left(1-p_{i i}\right)^{2}}
+    $$
+
+La bondad de ajuste está dada por el $R_{a}^{2}$, mientras que la bondad de predicción está dada por el $C_p$ . Otra métrica también utilizada es el error cuadrático medio para verificar cuanto se aleja la estimación de la medición, para este caso se usó el método de CV para medir esta métrica.
+
+```{r, results=TRUE}
+exhaustive = stepwise(data)
+Xy<-data.frame(X[,-1],data$BMI)
+bestlm <-bestglm(Xy = Xy,
+                      IC = "CV",
+                      method = "exhaustive")
+```
+
+Utilizando la función regsubsets con el metodo exhaustivo se obtuvieron los mejores (se queda con el modelo con mayor F) modelos para la cantidad de variables. En el gráfico de arriba se pueden ver como cambia el $R_{a}^{2}$ y el $C_p$ a medida que cambian la cantidad de variables. De aquí se podría considerar que el óptimo se obtiene con 5 variables, pero no hay mucha diferencia con los menores. Teniendo en cuenta de que se prefiere usar menor cantidad de variables se podría tomar el de 4 o 3.
+
+```{r, results=TRUE}
+summary(exhaustive)
+```
+
+En esta tabla se puede ver cuales variables se utilizan para la cantidad de variables.
+
+Para calcular el error cuadratico medio en cambio se usa la función bestglm ya que elije el mejor modelo (en este caso se le puede pedir que el mejor sea el que tenga menor ECM) usando cross validation.
+
+```{r, results=TRUE}
+bestlm$Subsets
+```
+
+Este algoritmo encuentra que el mejor modelo (el que minimiza el ECM) es el de 4 variables.
+
+Comparando los dos resultados elegimos el de 5 variables (en este caso dieron iguales) ya que para el segundo análisis no se encuentra muy alejado del mínimo, y para el primer análisis se encuentra cerca del óptimo.
+
+El modelo entonces resulta con los siguientes estimadores:
+
+```{r}
+coef(exhaustive, 4)
+```
 
 ## Punto 11
 
@@ -229,46 +356,75 @@ Recordando los supuestos del modelo:
 
 3.  Los errores tienen distribución normal, son independientes entre sí y no están correlacionados con las variables de entrada
 
+Que también se pueden ver como
+
+1.  Y $\sim$ $\mathcal{N}$(X$\beta$, $\sigma^2I$)
+
+2.  $E(Y|X=x)= \beta_0+\beta_1x_1+...+\beta_{p-1}x_{p-1}$
+
+3.  $Var(Y|X=x)$= $\sigma^2$
+
+4.  $Y_{1}, \ldots, Y_{n}$ son independientes
+
 Al tener un modelo multivariable es necesario analizar los residuos para comprender si los supuestos son válidos en el modelo propuesto. En principio, el mirar un gráfico de los residuos y reconocer patrones es un indicio de que el modelo no es adecuado. Deberían ser puntos distribuidos aleatoriamente con media cero.
 
-La visualización de los residuos se puede ver en el siguiente gráfico:
-
 ```{r,results=TRUE, echo=TRUE}
-#Residuos unicamente
-
-residuals_std<-rstandard(modelo) #t-residuals
-
-ggplot(data=data, aes(x=1:length(modelo$residuals), y=modelo$residuals)) + 
-  geom_point(col="gray0", fill="darkorchid3", alpha = .9) + 
-  labs(title="Residuos", x="Indice", y="Valores") + xlim(c(0,length(modelo$residuals))) + ylim(c(min(modelo$residuals),max(modelo$residuals)))
+par(mfrow = c(2, 2))
+plot(modelo)
+# 
+# residuals_std<-rstandard(modelo) #t-residuals
+# 
+# ggplot(data=data, aes(x=1:length(modelo$residuals), y=modelo$residuals)) + 
+#   geom_point(col="gray0", fill="darkorchid3", alpha = .9) + 
+#   labs(title="Residuos", x="Indice", y="Valores") + xlim(c(0,length(modelo$residuals))) + ylim(c(min(modelo$residuals),max(modelo$residuals)))
 
 
 ```
 
-```{r,results=TRUE}
-mean(modelo$residuals)
-```
+En el gráfico superior izquierdo se puede verificar que la media es nula, y el supuesto de linealidad es válido.
 
-De donde podemos verificar que la media es nula, y el primer supuesto es válido.
+Además, sabemos que podemos comprar ,mediante el gráfico superior derecho, la normalidad de los supuestos. Vemos que los residuos siguen una distribución normal.
 
-Además, sabemos que podemos comprar mediante un gráfico de
+Luego, con el gráfico inferior izquierdo podemos comprobar la homeocedasticidad, puesto que la varianza de los residuos es relativamente constante.
+
+Con el gráfico inferior derecho se verifica la presencia de outliers, que son valores extremos dentro de nuestro set y que pueden afectar al Residual Standar Error.
+
+## Punto 12
+
+Como se había elegido la columna SkinThickness, se realiza el bootstrap no paramétrico y como remuestra se toma la salida de la regresión simple. Se toman 10000 muestras del estimador y se gráfica la densidad usando nucleo gaussiano, se compara contra una normal y se calculan la media y el desvío estandard.
 
 ```{r}
-
-# ggplot(data=data, aes(x=1:length(residuals_std), y=residuals_std)) + 
-#   geom_point(col="gray0", fill="darkorchid3", alpha = .9) + 
-#   labs(title="Residuos standard", x="Indice", y="Valores") + xlim(c(0,length(residuals_std))) + ylim(c(min(residuals_std),max(residuals_std)))
-
-#Residuos vs outcomes predichos
-
-ggplot(data=data, aes(x=modelo$fitted.values, y=modelo$residuals)) +    geom_point(col="gray0", fill="darkorchid3", alpha = .9) + 
-   labs(title="Residuos", x="BMI", y="Valores") + xlim(c(0,length(modelo$fitted.values))) + ylim(c(min(modelo$residuals),max(modelo$residuals)))
-
-qqnorm(modelo$residuals, col = "mediumpurple3", pch = 20, xlab = "Cuantiles teóricos", ylab = "Cuantiles estimados", main = "Normalidad de residuos")
-qqline(modelo$residuals, col="black")
-
-#qqt(modelo$residuals, df = Inf)
-mean(residuals_std)
-
-sd(modelo$residuals)
+Nboot = 10000
+n = length(data$BMI)
+data_bootstrap = cbind(BMI = data$BMI, SkinThickness = data$SkinThickness)
+estimations = c()
+for(i in 1:Nboot) 
+{
+  samples = data_bootstrap[sample(nrow(data_bootstrap),size=n,replace=TRUE),]
+  lin_reg_boot = lm(samples[,1]~samples[,2])
+  estimations[i] = unname(lin_reg_boot$coefficients[2])
+}
 ```
+
+```{r, echo=TRUE, results=TRUE}
+mean(estimations)
+var(estimations)
+```
+
+```{r, echo=FALSE, results=TRUE}
+plot(density(estimations,
+             bw = "nrd0", 
+             adjust = 1,
+             kernel = "gaussian", window=1), col="mediumpurple3",lwd = 3)
+legend("topright", legend="Gaussian kernel",
+       col="mediumpurple3", lty=1:2, cex=0.8)
+grid()
+```
+
+```{r, echo=FALSE, results=TRUE}
+qqnorm(estimations, col = "mediumpurple3", pch = 20, xlab = "Cuantiles teóricos", ylab = "Cuantiles estimados", main = "Comparación para las medias")
+qqline(estimations, col="black")
+grid(nx = NULL, ny = NULL, lty = 2, col = "gray", lwd = 1)
+```
+
+Se puede notar que es similar a una gaussiana, esto es útil ya que indica que el valor no varía mucho.
