@@ -2,38 +2,69 @@
 title: "Entrega2"
 output: html_document
 date: '2022-07-16'
+editor_options: 
+  markdown: 
+    wrap: 72
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-[*En este problema, para cada muestra de tejido hay un microarray que contiene las expresiones de
-2000 genes. Buscamos clasificar en una de dos clases: Normal o con tumor, usando 2000 variables
-explicativas correspondientes a los genes, a partir de una muestra de tamaño 62. El objetivo es, además
-de encontrar una regla de clasificación adecuada, hallar los genes más relevantes para clasificar. Los
-datos de este problema corresponden al artículo 'Broad patterns of gene expression revealed by
-clustering of tumor and normal colon tissues probed by oligonucleotide arrays' U. Alon, N. Barkai,
-D. A. Notterman, K. Gish, S. Ybarra, D. Mack, and A. J. Levine, Proc. Natl. Acad. Sci. USA, Vol.
-96, Issue 12, 6745-6750, June 8, 1999. Colon X tiene la traspuesta de X: cada bloque de 62 números
-es una columna de X, y cada microarray es una fila. [**Use los métodos que le resulten adecuados,
-incluyendo "Nearest shrunken centroids", que fue inventado especialmente para estos casos**.]{.underline} Los microarrays tienen mucha variabilidad; dos microarrays con la misma muestra de tejido pueden dar muy distintos. Si para cada uno de los 62 tejidos calculamos mediana y MAD y los graficamos, se
-ve que ambas varían enormemente, y que tienen una relación lineal. Lo que se acostumbra en estos
-casos es tomar logaritmo de todo.*]{.smallcaps}
+# Enunciado e información útil
+
+[*En este problema, para cada muestra de tejido hay un microarray que
+contiene las expresiones de 2000 genes. Buscamos clasificar en una de
+dos clases: Normal o con tumor, usando 2000 variables explicativas
+correspondientes a los genes, a partir de una muestra de tamaño 62. El
+objetivo es, además de encontrar una regla de clasificación adecuada,
+hallar los genes más relevantes para clasificar. Los datos de este
+problema corresponden al artículo 'Broad patterns of gene expression
+revealed by clustering of tumor and normal colon tissues probed by
+oligonucleotide arrays' U. Alon, N. Barkai, D. A. Notterman, K. Gish, S.
+Ybarra, D. Mack, and A. J. Levine, Proc. Natl. Acad. Sci. USA, Vol. 96,
+Issue 12, 6745-6750, June 8, 1999. Colon X tiene la traspuesta de X:
+cada bloque de 62 números es una columna de X, y cada microarray es una
+fila. [**Use los métodos que le resulten adecuados, incluyendo "Nearest
+shrunken centroids", que fue inventado especialmente para estos
+casos**.]{.underline} Los microarrays tienen mucha variabilidad; dos
+microarrays con la misma muestra de tejido pueden dar muy distintos. Si
+para cada uno de los 62 tejidos calculamos mediana y MAD y los
+graficamos, se ve que ambas varían enormemente, y que tienen una
+relación lineal. Lo que se acostumbra en estos casos es tomar logaritmo
+de todo.*]{.smallcaps}
 
 [Info mail de Jemina:]{.smallcaps}
 
-[*The matrix Colon_X contains the expression of the 2000 genes with highest minimal intensity across the 62 tissues. The genes are placed in order of descending minimal intensity. Each entry in Colon_X is a gene intensity derived from the \~20 feature pairs that correspond to the gene on the chip, derived using the filtering process described in the 'materials and methods' section. The data is otherwise unprocessed (for xample it has not been normalized by the mean intensity of each experiment).*]{.smallcaps}
+[*The matrix Colon_X contains the expression of the 2000 genes with
+highest minimal intensity across the 62 tissues. The genes are placed in
+order of descending minimal intensity. Each entry in Colon_X is a gene
+intensity derived from the \~20 feature pairs that correspond to the
+gene on the chip, derived using the filtering process described in the
+'materials and methods' section. The data is otherwise unprocessed (for
+xample it has not been normalized by the mean intensity of each
+experiment).*]{.smallcaps}
 
-[*The identity of the 62 tissues is given in file Colon\_[tissues](http://genomics-pubs.princeton.edu/oncology/affydata/tissues.html). The numbers correspond to patients, a positive sign to a normal tissue, and a negative sign to a tumor tissue.*]{.smallcaps}
+[*The identity of the 62 tissues is given in file
+Colon\_[tissues](http://genomics-pubs.princeton.edu/oncology/affydata/tissues.html).
+The numbers correspond to patients, a positive sign to a normal tissue,
+and a negative sign to a tumor tissue.*]{.smallcaps}
 
-[O sea, para cada muestra de tejido hay un microarray que contiene las "expresiones" de 2000 genes. Tenemos un problema de clasificación con p=2000 (genes), n=62(tejidos) y 2 clases ("+"=normal, "-"=tumor).]{.smallcaps}
+[O sea, para cada muestra de tejido hay un microarray que contiene las
+"expresiones" de 2000 genes. Tenemos un problema de clasificación con
+p=2000 (genes), n=62(tejidos) y 2 clases ("+"=normal,
+"-"=tumor).]{.smallcaps}
 
-# Ayudas 
+# Ayudas
 
 Gráficos relevantes: <https://pubmed.ncbi.nlm.nih.gov/10359783/>
 
-Mismo set de datos pero más lindo: <https://rdrr.io/cran/plsgenomics/man/Colon.html> . Nosotros tenemos como +/- las categorías, en este dataset están como grupo 1 y grupo 2
+Mismo set de datos pero más lindo:
+<https://rdrr.io/cran/plsgenomics/man/Colon.html> . Nosotros tenemos
+como +/- las categorías, en este dataset están como grupo 1 y grupo 2
+
+Comparación de dataframes:
+<https://cran.r-project.org/web/packages/arsenal/vignettes/comparedf.html>
 
 # Carga de Bibliotecas
 
@@ -50,46 +81,92 @@ library(reshape) # Melt data for plotting
 library(tree) # CART
 library(ShrinkCovMat)
 library(plsgenomics) #dataset with "Alon 1999" info
+library(pamr) #K-centroids
+library(arsenal)#Datasets comparison 
 
-
+# load data set
+data(Colon)
 ```
 
 ```{r}
 #Data from files 
 ct<- read.table("colonT.txt", header=F ,sep=" ")
 cx <- read.table("Colon_X.txt", sep = "" , header = F , nrows = 2000,
-                     na.strings ="", stringsAsFactors= F)
+                     na.strings ="", stringsAsFactors= F) #Error loading first element 
 cx <- as.data.frame(t(cx))
 
 
+x<-Colon$X
+y<-Colon$Y
+
+
+```
+
+```{r}
+#Compare dataframes
+# MIRAR DE NUEVO PARA VER POR QUE NO ES IGUAL LA COMPARACIÓN SI LOS DATOS SON IGUALES
+
+dfcx<-as.data.frame(cx)
+dfcy<-as.data.frame(ct)
+
+dfx<-as.data.frame(x)
+dfy<-as.data.frame(y)
+
+comparedf(dfx,dfcx)
+
+```
+
+```{r}
+
+#Trainig and test data generation
+
+n <- dim(Colon$X)[1]
+set.seed(8)
+
+id <- sample(1:n, floor(n*0.7))
+x_train <- as.data.frame(Colon$X[id,]) #Apply resampling methods for a better estimation. A dataset #with only 62 samples is too low: K-Fold cross validation, Leave-one-out cross validation, Bootstrap
+
+
+x_test <- as.data.frame(Colon$X[-id,])
+
+y_train <- as.data.frame( Colon$Y[id])
+y_test <- as.data.frame(Colon$Y[-id])
+```
+
+# Visualización de datos iniciales
+
+```{r}
+#numericCols = sapply(cx, is.numeric)
+#numericCols["Purchase"] = TRUE # add Purchase (The response variable)
+#p = ggpairs(cx, # Get Numeric Cols and then cateogircal?
+#        aes(colour = Purchase, alpha=0.9),
+#        upper = list(continuous = wrap("cor", size = 2)),
+#        diag = list(continuous = "barDiag"),
+#        lower = list(continuous = "smooth"))
+#suppressMessages(print(p))
+```
+
+```{r}
 # load data set
-data(Colon)
-```
-
-#  Visualización de datos iniciales 
-
-```{r}
-numericCols = sapply(cx, is.numeric)
-numericCols["Purchase"] = TRUE # add Purchase (The response variable)
-p = ggpairs(cx, # Get Numeric Cols and then cateogircal?
-        aes(colour = Purchase, alpha=0.9),
-        upper = list(continuous = wrap("cor", size = 2)),
-        diag = list(continuous = "barDiag"),
-        lower = list(continuous = "smooth"))
-suppressMessages(print(p))
-```
-
-\
-
-```{r}
-
-
-# load data set
-summary(Colon$X)
+#summary(Colon$X)
 ```
 
 ```{r}
-ggplot(data=cx, aes(x=1:length(cx$V10), y=cx$V10)) + 
-  geom_point(col="gray0", fill="darkorchid3", alpha = .9) + 
-  labs(title="Datos", x="Indice", y="Valores") + xlim(c(0,length(data1$x))) + ylim(c(min(data1$x),max(data1$x)))
+#ggplot(data=cx, aes(x=1:length(cx$V10), y=cx$V10)) + 
+#  geom_point(col="gray0", fill="darkorchid3", alpha = .9) + 
+#  labs(title="Datos", x="Indice", y="Valores") + xlim(c(0,length(data1$x))) + ylim(c(min(data1$x),max(data1$x)))
+```
+
+# Solución de clasificación por *N nearest centroids*
+
+```{r}
+#VER COMO IMPLEMENTAR CORRECTAMENTE
+mydata <- list(x=x_train[,],y=as.factor(y_train[]),geneid=as.character(1:nrow(Colon$gene.names)), genenames=rownames(Colon$gene.names))
+
+# Buiding NSC model
+
+model <- pamr.train(mydata)
+modelCV <- pamr.cv(model,mydata)
+
+pamr.plotcv(modelCV)
 ```
