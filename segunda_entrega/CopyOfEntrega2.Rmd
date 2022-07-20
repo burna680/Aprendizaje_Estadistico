@@ -79,6 +79,7 @@ library(purrr) # Organizing
 library(tidyr) # Organize/tidy data
 library(reshape) # Melt data for plotting
 library(tree) # CART
+library(dplyr)
 library(ShrinkCovMat)
 library(plsgenomics) #dataset with "Alon 1999" info
 library(pamr) #K-centroids
@@ -88,6 +89,10 @@ library(arsenal)#Datasets comparison
 # data(Colon)
 ```
 
+# Definición del problema
+
+# Visualización de los datos
+
 ```{r}
 #Data from files 
 y <- read.table("colonT.txt", header=F ,sep=" ")
@@ -95,8 +100,12 @@ y = as.factor(sign(y[,]))
 
 
 x <- read.table("Colon_X.txt", sep = "" , header = F, na.strings ="", stringsAsFactors= F) #Error loading first element
-x <- as.data.frame(t(x)) # transpose and to df
+x <- log(as.data.frame(t(x))) # transpose and to df
 
+
+```
+
+```{r}
 
 ```
 
@@ -143,6 +152,11 @@ y_test <- as.data.frame(y[-id])
 # Solución de clasificación por *N nearest centroids*
 
 ```{r}
+pca = prcomp(data.matrix((x)), tol = 0)
+summary(pca)
+```
+
+```{r}
 x_train_matrix = data.matrix(x_train, row.names(x_train))
 y_train_matrix = data.matrix(y_train, row.names(y_train))
 data_train <- list(x = t(x_train_matrix), 
@@ -158,4 +172,33 @@ pamr.plotcv(modelCV)
 
 ```{r}
 confusion_table = pamr.confusion(modelCV, threshold = 2.496, extra = TRUE)
+```
+
+```{r}
+s = cov(x)
+e = eigen(s)
+gamma = e$vectors
+lambda = e$values
+xraya = apply(x, 2, mean)
+
+v = t(gamma) %*% (t(x) - xraya)
+v_df = as.data.frame(t(v))
+
+
+```
+
+```{r}
+acumulator = 0
+i = 1
+pca_df = data.frame(matrix(NA, nrow = 62, ncol = 2000))
+names(pca_df) = names(v_df)
+for (var in var_explicada) {
+  if(acumulator < 0.95){
+    pca_df[names(v_df)[i]] = v_df[names(v_df)[i]]
+  } else {
+    break
+  }
+  acumulator = var + acumulator
+  i = i + 1
+}
 ```
